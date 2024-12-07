@@ -5,11 +5,11 @@ internal class Program
 
     struct Publication
     {
-        int numberOfRegistration;
-        DateOnly dateOfRegistration;
-        string type, UDC, fullNameOfAuthor, title, fullNameOfReviewer;
-        int journalNumber;
-        DateOnly magazineReleaseDate;
+        public long numberOfRegistration;
+        public DateOnly dateOfRegistration;
+        public string type, UDC, fullNameOfAuthor, title, fullNameOfReviewer;
+        public int journalNumber;
+        public DateOnly magazineReleaseDate;
     }
 
     private static void Main()
@@ -18,14 +18,52 @@ internal class Program
         Console.ResetColor();
         Console.Clear();
 
-    }
-    static Publication[] ReadPublicationsFromFile(StreamReader srPublication)
-    {
-
-    }
-    static Publication ReadPublicationFromFile(StreamReader srPublication)
-    {
+        StreamReader srReferenceBookOfType = new StreamReader("..\\..\\..\\..\\DataFiles\\ReferenceBookOfType.txt"),
+            srReferenceBookOfUDC = new StreamReader("..\\..\\..\\..\\DataFiles\\ReferenceBookOfUDC.txt"),
+            srReferenceBookOfFullNameOfReviewer = new StreamReader("..\\..\\..\\..\\DataFiles\\ReferenceBookOfFullNameOfReviewer.txt"),
+            srPublication = new StreamReader("..\\..\\..\\..\\DataFiles\\Publications.txt");
+        List<string> referenceBookOfType = ReadReferenceBook(srReferenceBookOfType),
+            referenceBookOfUDC = ReadReferenceBook(srReferenceBookOfUDC),
+            referenceBookOfFullNameOfReviewer = ReadReferenceBook(srReferenceBookOfFullNameOfReviewer);
+        List<Publication> publications = ReadPublicationsFromFile(srPublication);
         
+
+        MainMenu();
+    }
+    static List<Publication> ReadPublicationsFromFile(StreamReader srPublication)
+    {
+        StreamReader sr = srPublication;
+        Type type = new Publication().GetType();
+        List<Publication> publications = new List<Publication>();
+        for (int i = 0; i < sr.ReadToEnd().Length / type.GetFields().Length; i++)
+        {
+            publications.Add(ReadPublicationFromFile(sr));
+        }
+        return publications;
+    }
+    static Publication ReadPublicationFromFile(StreamReader srPublication)//нету проверок т.к. файл доверенный источник и в нём нет ошибок
+    {
+        Publication publication = new Publication();
+        publication.numberOfRegistration = Convert.ToInt64(srPublication.ReadLine());
+        publication.dateOfRegistration = DateOnly.Parse(srPublication.ReadLine()!);
+        publication.type = srPublication.ReadLine()!;
+        publication.UDC = srPublication.ReadLine()!;
+        publication.fullNameOfAuthor = srPublication.ReadLine()!;
+        publication.title = srPublication.ReadLine()!;
+        publication.fullNameOfReviewer = srPublication.ReadLine()!;
+        publication.journalNumber = Convert.ToInt32(srPublication.ReadLine());
+        publication.magazineReleaseDate = DateOnly.Parse(srPublication.ReadLine()!);
+        return publication;
+    }
+    static List<string> ReadReferenceBook(StreamReader srReferenceBook)
+    {
+        StreamReader sr = srReferenceBook;
+        List<string> referenceBook = new List<string>();
+        for (int i = 0; i < sr.ReadToEnd().Length; i++)
+        {
+            referenceBook.Add(sr.ReadLine()!);
+        }
+        return referenceBook;
     }
     static void MainMenu()
     {
@@ -59,7 +97,7 @@ internal class Program
                         SortMenu();
                         break;
                     case 5:
-                        RecoverDataFromReserv();
+                        RecoverDataFromFile();
                         break;
                     case 0:
                         Console.WriteLine("Выход из программы");
@@ -76,7 +114,7 @@ internal class Program
 
     static void EditMenu()
     {
-        
+
     }
 
     static void OutputMenu()
@@ -86,41 +124,42 @@ internal class Program
 
     static void SearchMenu()
     {
-        
+
     }
 
     static void SortMenu()
     {
-        
+
     }
 
     static void SaveInFile()
     {
 
     }
-    static void SaveInReservFile()
+
+    static void RecoverDataFromFile()
     {
 
     }
-    static void RecoverDataFromReserv()
-    {
-        
-    }
+
     static void AddToDataBase()
     {
-        
+
     }
+
     static void EditInDataBase()
     {
-        
+
     }
+
     static void DeleteInDataBase()
     {
-        
+
     }
+
     static void SortStudentsByFullName()
     {
-        
+
     }
     static bool IsValidOption(out int option)
     {
