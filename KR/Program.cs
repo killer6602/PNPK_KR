@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 internal class Program
@@ -140,7 +139,7 @@ internal class Program
         {
             Console.WriteLine("Выберете один из вариантов работы с Базой данных:");
             Console.WriteLine("1) Редактирование БД");
-            Console.WriteLine("2) Редактирование БД");
+            Console.WriteLine("2) Редактирование справочников");
             Console.WriteLine("3) Вывод данных");
             Console.WriteLine("4) Поиск в БД");
             Console.WriteLine("5) Сортировка записей");
@@ -155,7 +154,7 @@ internal class Program
                 switch (option)
                 {
                     case 1:
-                        EditDBMenu();
+                        EditDBMenu(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
                         break;
                     case 2:
                         EditReferenceBooksMenu();
@@ -185,9 +184,108 @@ internal class Program
         }
     }
 
-    static void EditDBMenu()
+    static void EditDBMenu(List<Publication> publications,
+                           List<ReferenceBook> referenceBookOfType,
+                           List<ReferenceBook> referenceBookOfUDC,
+                           List<ReferenceBook> referenceBookOfFullNameOfReviewer)
     {
+        bool flag = true;
+        while (flag)
+        {
+            Console.Clear();
+            Console.WriteLine("Выберете один из вариантов изменения данных:");
+            Console.WriteLine("1) Добавление");
+            Console.WriteLine("2) Изменение");
+            Console.WriteLine("3) Удаление");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("0) Назад");
+            Console.ResetColor();
+            if (IsValidOption(out int option))
+            {
+                Console.Clear();
+                switch (option)
+                {
+                    case 1:
+                        Publication publication = ReadPublicationFromConsole(referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        publications.Add(publication);
+                        break;
+                    case 2:
 
+                        break;
+                    case 3:
+
+                        break;
+                    case 0:
+                        flag = false;
+                        break;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Отсутствует опция под номером {option}");
+                        Console.ResetColor();
+                        break;
+                }
+            }
+        }
+    }
+    static Publication ReadPublicationFromConsole(List<ReferenceBook> referenceBookOfType,
+                                                  List<ReferenceBook> referenceBookOfUDC,
+                                                  List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+    {
+        Regex pattern = new(@"([А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\b)|([A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\b)");
+        Publication publication = new Publication();
+
+        long number;
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите регистрационный номер");
+        } while (!IsValid(out number));
+        publication.numberOfRegistration = number;
+
+        DateOnly date;
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите дату регистрации публикации");
+        } while (!IsValid(out date));
+        publication.dateOfRegistration = date;
+
+        publication.IDOfType = GetChosenIDOfReferenceBook(referenceBookOfType, "Типа публикации");
+
+        publication.IDOfUDC = GetChosenIDOfReferenceBook(referenceBookOfUDC, "УДК");
+
+        string text;
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите ФИО автора");
+        } while (!IsValidByRegex(out text!, pattern));
+        publication.fullNameOfAuthor = text;
+
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите заголовок публикации");
+        } while (!IsntNullWithConsoleOutput(out text!));
+        publication.title = text;
+
+        publication.IDOfFullNameOfReviewer = GetChosenIDOfReferenceBook(referenceBookOfFullNameOfReviewer, "ФИО рецензента");
+
+        int journalNumber;
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите номер журнала");
+        } while (!IsValid(out journalNumber));
+        publication.journalNumber = journalNumber;
+
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите дату релиза в магазин");
+        } while (!IsValid(out date));
+        publication.magazineReleaseDate = date;
+        return publication;
     }
 
     static void EditReferenceBooksMenu()
@@ -195,6 +293,7 @@ internal class Program
 
     }
 
+    #region Output
     static void OutputMenu(List<Publication> publications,
                            List<ReferenceBook> referenceBookOfType,
                            List<ReferenceBook> referenceBookOfUDC,
@@ -217,13 +316,16 @@ internal class Program
                 switch (option)
                 {
                     case 1:
-                        WritePublications(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        WritePublication(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
                         break;
                     case 2:
+                        WriteReferenceBook(referenceBookOfType, "Тип публикации");
                         break;
                     case 3:
+                        WriteReferenceBook(referenceBookOfUDC, "УДК");
                         break;
                     case 4:
+                        WriteReferenceBook(referenceBookOfFullNameOfReviewer, "ФИО рецензента");
                         break;
                     case 0:
                         flag = false;
@@ -238,7 +340,8 @@ internal class Program
         }
     }
 
-    static void WritePublications(List<Publication> publications,
+
+    static void WritePublication(List<Publication> publications, //лучше перегрузка или два отдельных метода?
                                   List<ReferenceBook> referenceBookOfType,
                                   List<ReferenceBook> referenceBookOfUDC,
                                   List<ReferenceBook> referenceBookOfFullNameOfReviewer)
@@ -248,18 +351,17 @@ internal class Program
             WritePublication(publications[i], referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
         }
         Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine("########################################################################################################################");
+        Console.WriteLine($"{new string('#', 120)}");
         Console.ResetColor();
         Console.WriteLine();
     }
-
     static void WritePublication(Publication publication,
                                   List<ReferenceBook> referenceBookOfType,
                                   List<ReferenceBook> referenceBookOfUDC,
                                   List<ReferenceBook> referenceBookOfFullNameOfReviewer)
     {
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("------------------------------------------------------------------------------------------------------------------------");
+        Console.WriteLine($"{new string('-', 120)}");
         Console.ResetColor();
         Console.WriteLine();
         Console.WriteLine($"Регистрационный номер: {publication.numberOfRegistration}");
@@ -268,11 +370,28 @@ internal class Program
         Console.WriteLine($"УДК: {referenceBookOfUDC[referenceBookOfUDC.FindIndex(x => x.ID == publication.IDOfUDC)].title}");
         Console.WriteLine($"ФИО автора: {publication.fullNameOfAuthor}");
         Console.WriteLine($"Название: {publication.title}");
-        Console.WriteLine($"ФИО рецензента{referenceBookOfFullNameOfReviewer[referenceBookOfFullNameOfReviewer.FindIndex(x => x.ID == publication.IDOfFullNameOfReviewer)].title}");
-        Console.WriteLine($"Номер журнала{publication.journalNumber}");
+        Console.WriteLine($"ФИО рецензента: {referenceBookOfFullNameOfReviewer[referenceBookOfFullNameOfReviewer.FindIndex(x => x.ID == publication.IDOfFullNameOfReviewer)].title}");
+        Console.WriteLine($"Номер журнала: {publication.journalNumber}");
         Console.WriteLine($"Дата выхода выпуска в магазин: {publication.magazineReleaseDate}");
         Console.WriteLine();
     }
+
+    static void WriteReferenceBook(List<ReferenceBook> referenceBook, string text)
+    {
+        Console.WriteLine($"| ID |\t{text}");
+        Console.WriteLine($"{new string('-', 120)}");
+        for (int i = 0; i < referenceBook.Count; i++)
+        {
+            WriteReferenceBook(referenceBook[i]);
+        }
+        Console.WriteLine();
+    }
+    static void WriteReferenceBook(ReferenceBook referenceBook)
+    {
+        Console.WriteLine($"|{referenceBook.ID:D4}|\t{referenceBook.title}");
+    }
+    #endregion
+
     static void SearchMenu()
     {
 
@@ -283,6 +402,7 @@ internal class Program
 
     }
 
+    #region Save and Recover
     static void SaveAllChanges(StreamWriter swOfPublications, List<Publication> publications,
                            StreamWriter swOfRBOfType, List<ReferenceBook> RBOfType,
                            StreamWriter swOfRBOfUDC, List<ReferenceBook> RBOfUDC,
@@ -351,6 +471,7 @@ internal class Program
         Console.WriteLine("Данные успешно востановленно");
         Console.ResetColor();
     }
+    #endregion
 
     static void AddToDataBase()
     {
@@ -371,11 +492,44 @@ internal class Program
     {
 
     }
-    static bool IsValidOption(out int option)
+
+    #region short
+    static bool IsValid(out short option, int? start = null, int? end = null)
     {
-        return IsValidInt(out option, 0);
+        if (short.TryParse(Console.ReadLine(), out option) && (start == null || option >= start) && (end == null || option <= end))
+        {
+            return true;
+        }
+        else
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Неверный ввод, повторите попытку ввода");
+            Console.ResetColor();
+            return false;
+        }
     }
-    static bool IsValidInt(out int option, int? start = null, int? end = null)
+    static bool IsValidOrNull(out short option, int? start = null, int? end = null)
+    {
+        string? input = Console.ReadLine();
+        option = -1;
+        if (input == null || input.Length == 0 || short.TryParse(input, out option) && (start == null || option >= start) && (end == null || option <= end))
+        {
+            return true;
+        }
+        else
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Неверный ввод, повторите попытку ввода");
+            Console.ResetColor();
+            return false;
+        }
+    }
+    #endregion
+
+    #region int
+    static bool IsValid(out int option, int? start = null, int? end = null)
     {
         if (int.TryParse(Console.ReadLine(), out option) && (start == null || option >= start) && (end == null || option <= end))
         {
@@ -390,7 +544,7 @@ internal class Program
             return false;
         }
     }
-    static bool IsValidIntOrNull(out int option, int? start = null, int? end = null)
+    static bool IsValidOrNull(out int option, int? start = null, int? end = null)
     {
         string? input = Console.ReadLine();
         option = -1;
@@ -407,7 +561,80 @@ internal class Program
             return false;
         }
     }
-    static bool IsValidByRegexWithConsoleOutput(out string? input, Regex pattern)
+    #endregion
+
+    #region long
+    static bool IsValid(out long option, int? start = null, int? end = null)
+    {
+        if (long.TryParse(Console.ReadLine(), out option) && (start == null || option >= start) && (end == null || option <= end))
+        {
+            return true;
+        }
+        else
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Неверный ввод, повторите попытку ввода");
+            Console.ResetColor();
+            return false;
+        }
+    }
+    static bool IsValidOrNull(out long option, int? start = null, int? end = null)
+    {
+        string? input = Console.ReadLine();
+        option = -1;
+        if (input == null || input.Length == 0 || long.TryParse(input, out option) && (start == null || option >= start) && (end == null || option <= end))
+        {
+            return true;
+        }
+        else
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Неверный ввод, повторите попытку ввода");
+            Console.ResetColor();
+            return false;
+        }
+    }
+    #endregion
+
+    #region DateOnly
+    static bool IsValid(out DateOnly output, int? start = null, int? end = null)
+    {
+        if (DateOnly.TryParse(Console.ReadLine(), out output))
+        {
+            return true;
+        }
+        else
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Неверный ввод, повторите попытку ввода");
+            Console.ResetColor();
+            return false;
+        }
+    }
+    static bool IsValidOrNull(out DateOnly output, int? start = null, int? end = null)
+    {
+        string? input = Console.ReadLine();
+        output = new DateOnly(1, 1, 1);
+        if (input == null || input.Length == 0 || DateOnly.TryParse(input, out output))
+        {
+            return true;
+        }
+        else
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Неверный ввод, повторите попытку ввода");
+            Console.ResetColor();
+            return false;
+        }
+    }
+    #endregion
+
+    #region Regex
+    static bool IsValidByRegex(out string? input, Regex pattern)
     {
         input = Console.ReadLine();
         if (pattern.IsMatch(input!))
@@ -439,6 +666,13 @@ internal class Program
             return false;
         }
     }
+    #endregion
+
+    static bool IsValidOption(out int option)
+    {
+        return IsValid(out option, 0);
+    }
+
     static bool IsntNullWithConsoleOutput(out string? input)
     {
         input = Console.ReadLine();
@@ -454,5 +688,20 @@ internal class Program
             Console.ResetColor();
             return false;
         }
+    }
+
+    static short GetChosenIDOfReferenceBook(List<ReferenceBook> referenceBook, string text)
+    {
+        short chosenOne = -1;
+        do
+        {
+            Console.Clear();
+            Console.WriteLine($"Выберете вариант {text} из справочника:");
+            for (int i = 0; i < referenceBook.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}) {referenceBook[i].title}");
+            }
+        } while (!IsValid(out chosenOne, 1, referenceBook.Count));
+        return Convert.ToInt16(chosenOne - 1);
     }
 }
