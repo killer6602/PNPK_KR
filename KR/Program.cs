@@ -60,9 +60,9 @@ internal class Program
             srReferenceBookOfFullNameOfReviewer = new StreamReader("..\\..\\..\\DataFiles\\ReferenceBookOfFullNameOfReviewer.txt"),
             srPublication = new StreamReader("..\\..\\..\\DataFiles\\Publications.txt");
         List<Publication> publications = ReadPublicationsFromFile(srPublication);
-        List<ReferenceBook> referenceBookOfType = ReadReferenceBook(srReferenceBookOfType),
-            referenceBookOfUDC = ReadReferenceBook(srReferenceBookOfUDC),
-            referenceBookOfFullNameOfReviewer = ReadReferenceBook(srReferenceBookOfFullNameOfReviewer);
+        List<ReferenceBook> referenceBookOfType = ReadReferenceBookFromFile(srReferenceBookOfType),
+            referenceBookOfUDC = ReadReferenceBookFromFile(srReferenceBookOfUDC),
+            referenceBookOfFullNameOfReviewer = ReadReferenceBookFromFile(srReferenceBookOfFullNameOfReviewer);
         srPublication.Close();
         srReferenceBookOfType.Close();
         srReferenceBookOfUDC.Close();
@@ -117,7 +117,7 @@ internal class Program
         publication.magazineReleaseDate = DateOnly.Parse(srPublication.ReadLine()!);
         return publication;
     }
-    static List<ReferenceBook> ReadReferenceBook(StreamReader srReferenceBook)
+    static List<ReferenceBook> ReadReferenceBookFromFile(StreamReader srReferenceBook)
     {
         int n = srReferenceBook.ReadToEnd().Split('\n').Length;//получение количества объектов в файле
         srReferenceBook.BaseStream.Position = 0;//возвращение указателя StreamReader в начало файла
@@ -132,7 +132,120 @@ internal class Program
         }
         return referenceBook;
     }
+    #endregion
 
+    static void MainMenu(List<Publication> publications,
+                         List<ReferenceBook> referenceBookOfType,
+                         List<ReferenceBook> referenceBookOfUDC,
+                         List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+    {
+        while (true)
+        {
+            Console.WriteLine("Выберете один из вариантов работы с Базой данных:");
+            Console.WriteLine("1) Редактирование БД");
+            Console.WriteLine("2) Редактирование справочников");
+            Console.WriteLine("3) Вывод данных");
+            Console.WriteLine("4) Поиск в БД");
+            Console.WriteLine("5) Сортировка записей");
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("6) Востановить данные из резервного файла");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("0) Сохранить и выйти");
+            Console.ResetColor();
+            if (IsValidOption(out int option))
+            {
+                Console.Clear();
+                switch (option)
+                {
+                    case 1:
+                        EditDBMenu(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 2:
+                        EditReferenceBooksMenu(referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 3:
+                        OutputMenu(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 4:
+                        SearchMenu();
+                        break;
+                    case 5:
+                        SortMenu();
+                        break;
+                    case 6:
+                        RecoverDataFromFile(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 0:
+                        Console.WriteLine("Выход из программы");
+                        return;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Отсутствует опция под номером {option}");
+                        Console.ResetColor();
+                        break;
+                }
+            }
+        }
+    }
+
+    #region Edit
+    static void EditDBMenu(List<Publication> publications,
+                           List<ReferenceBook> referenceBookOfType,
+                           List<ReferenceBook> referenceBookOfUDC,
+                           List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+    {
+        bool flag = true;
+        while (flag)
+        {
+            Console.Clear();
+            Console.WriteLine("Выберете один из вариантов изменения данных:");
+            Console.WriteLine("1) Добавление");
+            Console.WriteLine("2) Изменение");
+            Console.WriteLine("3) Удаление");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("0) Назад");
+            Console.ResetColor();
+            if (IsValidOption(out int option))
+            {
+                Console.Clear();
+                switch (option)
+                {
+                    case 1:
+                        Publication publication = ReadPublicationFromConsole(referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        publications.Add(publication);
+                        break;
+                    case 2:
+                        do
+                        {
+                            Console.Clear();
+                            WritePublication(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                            Console.WriteLine($"Введите номер публикации которую хотите изменить (1-{publications.Count})");
+                        } while (!IsValid(out option, 1, publications.Count));
+                        option--;
+                        publications[option] = ReadPublicationFromConsoleOrLeaveAsItIs(publications[option], referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 3:
+                        do
+                        {
+                            Console.Clear();
+                            WritePublication(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                            Console.WriteLine($"Введите номер публикации которую хотите удалить (1-{publications.Count})");
+                        } while (!IsValid(out option, 1, publications.Count));
+                        option--;
+                        publications.RemoveAt(option);
+                        break;
+                    case 0:
+                        flag = false;
+                        break;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Отсутствует опция под номером {option}");
+                        Console.ResetColor();
+                        break;
+                }
+            }
+        }
+    }
     static Publication ReadPublicationFromConsole(List<ReferenceBook> referenceBookOfType,
                                                   List<ReferenceBook> referenceBookOfUDC,
                                                   List<ReferenceBook> referenceBookOfFullNameOfReviewer)
@@ -272,75 +385,19 @@ internal class Program
         newPublication.magazineReleaseDate = date == new DateOnly(1, 1, 1) ? publication.magazineReleaseDate : date;
         return newPublication;
     }
-    #endregion
 
-    static void MainMenu(List<Publication> publications,
-                         List<ReferenceBook> referenceBookOfType,
-                         List<ReferenceBook> referenceBookOfUDC,
-                         List<ReferenceBook> referenceBookOfFullNameOfReviewer)
-    {
-        while (true)
-        {
-            Console.WriteLine("Выберете один из вариантов работы с Базой данных:");
-            Console.WriteLine("1) Редактирование БД");
-            Console.WriteLine("2) Редактирование справочников");
-            Console.WriteLine("3) Вывод данных");
-            Console.WriteLine("4) Поиск в БД");
-            Console.WriteLine("5) Сортировка записей");
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("6) Востановить данные из резервного файла");
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("0) Сохранить и выйти");
-            Console.ResetColor();
-            if (IsValidOption(out int option))
-            {
-                Console.Clear();
-                switch (option)
-                {
-                    case 1:
-                        EditDBMenu(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
-                        break;
-                    case 2:
-                        EditReferenceBooksMenu();
-                        break;
-                    case 3:
-                        OutputMenu(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
-                        break;
-                    case 4:
-                        SearchMenu();
-                        break;
-                    case 5:
-                        SortMenu();
-                        break;
-                    case 6:
-                        RecoverDataFromFile(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
-                        break;
-                    case 0:
-                        Console.WriteLine("Выход из программы");
-                        return;
-                    default:
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"Отсутствует опция под номером {option}");
-                        Console.ResetColor();
-                        break;
-                }
-            }
-        }
-    }
-
-    static void EditDBMenu(List<Publication> publications,
-                           List<ReferenceBook> referenceBookOfType,
-                           List<ReferenceBook> referenceBookOfUDC,
-                           List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+    static void EditReferenceBooksMenu(List<ReferenceBook> referenceBookOfType,
+                                       List<ReferenceBook> referenceBookOfUDC,
+                                       List<ReferenceBook> referenceBookOfFullNameOfReviewer)
     {
         bool flag = true;
         while (flag)
         {
             Console.Clear();
-            Console.WriteLine("Выберете один из вариантов изменения данных:");
-            Console.WriteLine("1) Добавление");
-            Console.WriteLine("2) Изменение");
-            Console.WriteLine("3) Удаление");
+            Console.WriteLine("Выберете с каким справочником работать:");
+            Console.WriteLine("1) Типы публикации");
+            Console.WriteLine("2) УДК");
+            Console.WriteLine("3) Имя рецензента");
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("0) Назад");
             Console.ResetColor();
@@ -350,28 +407,13 @@ internal class Program
                 switch (option)
                 {
                     case 1:
-                        Publication publication = ReadPublicationFromConsole(referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
-                        publications.Add(publication);
+                        EditChosenReferenceBooksMenu(referenceBookOfType, "Тип публикации");
                         break;
                     case 2:
-                        do
-                        {
-                            Console.Clear();
-                            WritePublication(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
-                            Console.WriteLine($"Введите номер публикации которую хотите изменить (1-{publications.Count})");
-                        } while (!IsValid(out option, 1, publications.Count));
-                        option--;
-                        publications[option] = ReadPublicationFromConsoleOrLeaveAsItIs(publications[option], referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        EditChosenReferenceBooksMenu(referenceBookOfUDC, "УДК");
                         break;
                     case 3:
-                        do
-                        {
-                            Console.Clear();
-                            WritePublication(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
-                            Console.WriteLine($"Введите номер публикации которую хотите удалить (1-{publications.Count})");
-                        } while (!IsValid(out option, 1, publications.Count));
-                        option--;
-                        publications.RemoveAt(option);
+                        EditChosenReferenceBooksMenu(referenceBookOfFullNameOfReviewer, "ФИО рецензента");
                         break;
                     case 0:
                         flag = false;
@@ -385,12 +427,90 @@ internal class Program
             }
         }
     }
-    
-
-    static void EditReferenceBooksMenu()
+    static void EditChosenReferenceBooksMenu(List<ReferenceBook> referenceBook, string text)
+    {
+        bool flag = true;
+        while (flag)
+        {
+            Console.Clear();
+            Console.WriteLine("Выберете один из вариантов изменения данных справочников:");
+            Console.WriteLine("1) Добавление");
+            Console.WriteLine("2) Изменение");
+            Console.WriteLine("3) Удаление");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("0) Назад");
+            Console.ResetColor();
+            if (IsValidOption(out int option))
+            {
+                Console.Clear();
+                switch (option)
+                {
+                    case 1:
+                        ReferenceBook newReferenceBook = ReadReferenceBookFromConsole(referenceBook);
+                        referenceBook.Add(newReferenceBook);
+                        break;
+                    case 2:
+                        do
+                        {
+                            Console.Clear();
+                            WriteReferenceBook(referenceBook, text);
+                            Console.WriteLine($"Введите ID справочника который хотите изменить");
+                        } while (!IsValid(out option) || !referenceBook.Exists(x => x.ID == option));
+                        referenceBook[referenceBook.FindIndex(x => x.ID == option)] = ReadReferenceBookFromConsoleOrLeaveAsItIs(referenceBook, option);
+                        break;
+                    case 3:
+                        do
+                        {
+                            Console.Clear();
+                            WriteReferenceBook(referenceBook, text);
+                            Console.WriteLine($"Введите ID справочника который хотите удалить");
+                        } while (!IsValid(out option));
+                        referenceBook.RemoveAt(option);
+                        break;
+                    case 0:
+                        flag = false;
+                        break;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Отсутствует опция под номером {option}");
+                        Console.ResetColor();
+                        break;
+                }
+            }
+        }
+    }
+    static ReferenceBook ReadReferenceBookFromConsole(List<ReferenceBook> referenceBook)
     {
 
+        ReferenceBook newReferenceBook = new ReferenceBook();
+        string text;
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите новое название");
+        } while (!IsntNullWithConsoleOutput(out text!) || referenceBook.Exists(x => x.title.Equals(text)));
+        newReferenceBook.title = text;
+        newReferenceBook.ID = GetNewId(referenceBook);
+        return newReferenceBook;
     }
+    static ReferenceBook ReadReferenceBookFromConsoleOrLeaveAsItIs(List<ReferenceBook> referenceBook, int option)
+    {
+        ReferenceBook newReferenceBook = new ReferenceBook();
+        string? text;
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите новое название или нажмите Enter чтобы оставить как есть");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine($"На данный момент: {referenceBook[option].title}");
+            Console.ResetColor();
+            text = Console.ReadLine();
+        } while (referenceBook.Exists(x => x.title.Equals(text)));
+        newReferenceBook.title = text == null || text.Length == 0 ? referenceBook[option].title : text;
+        newReferenceBook.ID = referenceBook[option].ID;
+        return newReferenceBook;
+    }
+    #endregion
 
     #region Output
     static void OutputMenu(List<Publication> publications,
@@ -453,7 +573,6 @@ internal class Program
             Console.WriteLine($"№{i + 1}");
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"{new string('.', Console.BufferWidth)}");
-            
             Console.ResetColor();
             WritePublication(publications[i], referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
         }
@@ -568,9 +687,9 @@ internal class Program
             srReservReferenceBookOfFullNameOfReviewer = new StreamReader("..\\..\\..\\DataFiles\\ReferenceBookOfFullNameOfReviewer.txt"),
             srReservPublication = new StreamReader("..\\..\\..\\DataFiles\\Publications.txt");
         publications = ReadPublicationsFromFile(srReservPublication);
-        referenceBookOfType = ReadReferenceBook(srReservReferenceBookOfType);
-        referenceBookOfUDC = ReadReferenceBook(srReservReferenceBookOfUDC);
-        referenceBookOfFullNameOfReviewer = ReadReferenceBook(srReservReferenceBookOfFullNameOfReviewer);
+        referenceBookOfType = ReadReferenceBookFromFile(srReservReferenceBookOfType);
+        referenceBookOfUDC = ReadReferenceBookFromFile(srReservReferenceBookOfUDC);
+        referenceBookOfFullNameOfReviewer = ReadReferenceBookFromFile(srReservReferenceBookOfFullNameOfReviewer);
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine("Данные успешно востановленно");
         Console.ResetColor();
@@ -777,6 +896,19 @@ internal class Program
             Console.ResetColor();
             return false;
         }
+    }
+
+    static int GetNewId(List<ReferenceBook> list)
+    {
+        int number = -1;
+        for (int i = 0; number == -1; i++)
+        {
+            if (!list.Exists(x => x.ID == i))
+            {
+                number = i;
+            }
+        }
+        return number;
     }
 
     static short GetChosenIDOfReferenceBook(List<ReferenceBook> referenceBook, string text)
