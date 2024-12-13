@@ -88,6 +88,8 @@ internal class Program
                        swReferenceBookOfUDC, referenceBookOfUDC,
                        swReferenceBookOfFullNameOfReviewer, referenceBookOfFullNameOfReviewer);
     }
+
+    #region Read
     static List<Publication> ReadPublicationsFromFile(StreamReader srPublication)
     {
         Type type = new Publication().GetType();
@@ -130,6 +132,148 @@ internal class Program
         }
         return referenceBook;
     }
+
+    static Publication ReadPublicationFromConsole(List<ReferenceBook> referenceBookOfType,
+                                                  List<ReferenceBook> referenceBookOfUDC,
+                                                  List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+    {
+        Regex pattern = new(@"([А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\b)|([A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\b)");
+        Publication newPublication = new Publication();
+
+        long number;
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите регистрационный номер");
+        } while (!IsValid(out number));
+        newPublication.numberOfRegistration = number;
+
+        DateOnly date;
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите дату регистрации публикации");
+        } while (!IsValid(out date));
+        newPublication.dateOfRegistration = date;
+
+        newPublication.IDOfType = GetChosenIDOfReferenceBook(referenceBookOfType, "Типа публикации");
+
+        newPublication.IDOfUDC = GetChosenIDOfReferenceBook(referenceBookOfUDC, "УДК");
+
+        string text;
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите ФИО автора");
+        } while (!IsValidByRegex(out text!, pattern));
+        newPublication.fullNameOfAuthor = text;
+
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите заголовок публикации");
+        } while (!IsntNullWithConsoleOutput(out text!));
+        newPublication.title = text;
+
+        newPublication.IDOfFullNameOfReviewer = GetChosenIDOfReferenceBook(referenceBookOfFullNameOfReviewer, "ФИО рецензента");
+
+        int journalNumber;
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите номер журнала");
+        } while (!IsValid(out journalNumber));
+        newPublication.journalNumber = journalNumber;
+
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите дату релиза в магазин");
+        } while (!IsValid(out date));
+        newPublication.magazineReleaseDate = date;
+        return newPublication;
+    }
+    static Publication ReadPublicationFromConsoleOrLeaveAsItIs(Publication publication,
+                                                  List<ReferenceBook> referenceBookOfType,
+                                                  List<ReferenceBook> referenceBookOfUDC,
+                                                  List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+    {
+        Regex pattern = new(@"([А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\b)|([A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\b)");
+        Publication newPublication = new Publication();
+
+        long number;
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите регистрационный номер или нажмите Enter чтобы оставить прежний");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine($"На данный момент: {publication.numberOfRegistration}");
+            Console.ResetColor();
+        } while (!IsValidOrNull(out number));
+        newPublication.numberOfRegistration = number == -1 ? publication.numberOfRegistration : number;
+
+        DateOnly date;
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите дату регистрации публикации или нажмите Enter чтобы оставить прежний");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine($"На данный момент: {publication.dateOfRegistration}");
+            Console.ResetColor();
+        } while (!IsValidOrNull(out date));
+        newPublication.dateOfRegistration = date == new DateOnly(1, 1, 1) ? publication.dateOfRegistration : date;
+
+        newPublication.IDOfType = GetChosenIDOfReferenceBook(referenceBookOfType, "Типа публикации");
+
+        newPublication.IDOfUDC = GetChosenIDOfReferenceBook(referenceBookOfUDC, "УДК");
+
+        string text;
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите ФИО автора или нажмите Enter чтобы оставить прежний");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine($"На данный момент: {publication.fullNameOfAuthor}");
+            Console.ResetColor();
+        } while (!IsValidByRegexOrNull(out text!, pattern));
+        newPublication.fullNameOfAuthor = text == null ? publication.fullNameOfAuthor : text;
+
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите заголовок публикации или нажмите Enter чтобы оставить прежний");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine($"На данный момент: {publication.title}");
+            Console.ResetColor();
+        } while (!IsntNullWithConsoleOutput(out text!));
+        newPublication.title = text == null ? publication.title : text;
+
+        newPublication.IDOfFullNameOfReviewer = GetChosenIDOfReferenceBook(referenceBookOfFullNameOfReviewer, "ФИО рецензента");
+
+        int journalNumber;
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите номер журнала или нажмите Enter чтобы оставить прежний");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine($"На данный момент: {publication.journalNumber}");
+            Console.ResetColor();
+        } while (!IsValidOrNull(out journalNumber));
+        newPublication.journalNumber = journalNumber == -1 ? publication.journalNumber : journalNumber;
+
+        Console.Clear();
+        do
+        {
+            Console.WriteLine("Введите дату релиза в магазин или нажмите Enter чтобы оставить прежний");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine($"На данный момент: {publication.magazineReleaseDate}");
+            Console.ResetColor();
+        } while (!IsValidOrNull(out date));
+        newPublication.magazineReleaseDate = date == new DateOnly(1, 1, 1) ? publication.magazineReleaseDate : date;
+        return newPublication;
+    }
+    #endregion
+
     static void MainMenu(List<Publication> publications,
                          List<ReferenceBook> referenceBookOfType,
                          List<ReferenceBook> referenceBookOfUDC,
@@ -210,10 +354,24 @@ internal class Program
                         publications.Add(publication);
                         break;
                     case 2:
-
+                        do
+                        {
+                            Console.Clear();
+                            WritePublication(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                            Console.WriteLine($"Введите номер публикации которую хотите изменить (1-{publications.Count})");
+                        } while (!IsValid(out option, 1, publications.Count));
+                        option--;
+                        publications[option] = ReadPublicationFromConsoleOrLeaveAsItIs(publications[option], referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
                         break;
                     case 3:
-
+                        do
+                        {
+                            Console.Clear();
+                            WritePublication(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                            Console.WriteLine($"Введите номер публикации которую хотите удалить (1-{publications.Count})");
+                        } while (!IsValid(out option, 1, publications.Count));
+                        option--;
+                        publications.RemoveAt(option);
                         break;
                     case 0:
                         flag = false;
@@ -227,66 +385,7 @@ internal class Program
             }
         }
     }
-    static Publication ReadPublicationFromConsole(List<ReferenceBook> referenceBookOfType,
-                                                  List<ReferenceBook> referenceBookOfUDC,
-                                                  List<ReferenceBook> referenceBookOfFullNameOfReviewer)
-    {
-        Regex pattern = new(@"([А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\b)|([A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\b)");
-        Publication publication = new Publication();
-
-        long number;
-        Console.Clear();
-        do
-        {
-            Console.WriteLine("Введите регистрационный номер");
-        } while (!IsValid(out number));
-        publication.numberOfRegistration = number;
-
-        DateOnly date;
-        Console.Clear();
-        do
-        {
-            Console.WriteLine("Введите дату регистрации публикации");
-        } while (!IsValid(out date));
-        publication.dateOfRegistration = date;
-
-        publication.IDOfType = GetChosenIDOfReferenceBook(referenceBookOfType, "Типа публикации");
-
-        publication.IDOfUDC = GetChosenIDOfReferenceBook(referenceBookOfUDC, "УДК");
-
-        string text;
-        Console.Clear();
-        do
-        {
-            Console.WriteLine("Введите ФИО автора");
-        } while (!IsValidByRegex(out text!, pattern));
-        publication.fullNameOfAuthor = text;
-
-        Console.Clear();
-        do
-        {
-            Console.WriteLine("Введите заголовок публикации");
-        } while (!IsntNullWithConsoleOutput(out text!));
-        publication.title = text;
-
-        publication.IDOfFullNameOfReviewer = GetChosenIDOfReferenceBook(referenceBookOfFullNameOfReviewer, "ФИО рецензента");
-
-        int journalNumber;
-        Console.Clear();
-        do
-        {
-            Console.WriteLine("Введите номер журнала");
-        } while (!IsValid(out journalNumber));
-        publication.journalNumber = journalNumber;
-
-        Console.Clear();
-        do
-        {
-            Console.WriteLine("Введите дату релиза в магазин");
-        } while (!IsValid(out date));
-        publication.magazineReleaseDate = date;
-        return publication;
-    }
+    
 
     static void EditReferenceBooksMenu()
     {
@@ -348,21 +447,26 @@ internal class Program
     {
         for (int i = 0; i < publications.Count; i++)
         {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"{new string('▬', Console.BufferWidth)}");
+            Console.ResetColor();
+            Console.WriteLine($"№{i + 1}");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"{new string('.', Console.BufferWidth)}");
+            
+            Console.ResetColor();
             WritePublication(publications[i], referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
         }
         Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine($"{new string('#', 120)}");
+        Console.WriteLine($"{new string('#', Console.BufferWidth)}");
         Console.ResetColor();
         Console.WriteLine();
     }
     static void WritePublication(Publication publication,
-                                  List<ReferenceBook> referenceBookOfType,
-                                  List<ReferenceBook> referenceBookOfUDC,
-                                  List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+                                 List<ReferenceBook> referenceBookOfType,
+                                 List<ReferenceBook> referenceBookOfUDC,
+                                 List<ReferenceBook> referenceBookOfFullNameOfReviewer)
     {
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($"{new string('-', 120)}");
-        Console.ResetColor();
         Console.WriteLine();
         Console.WriteLine($"Регистрационный номер: {publication.numberOfRegistration}");
         Console.WriteLine($"Дата регистрации: {publication.dateOfRegistration}");
@@ -379,7 +483,7 @@ internal class Program
     static void WriteReferenceBook(List<ReferenceBook> referenceBook, string text)
     {
         Console.WriteLine($"| ID |\t{text}");
-        Console.WriteLine($"{new string('-', 120)}");
+        Console.WriteLine($"{new string('-', Console.BufferWidth)}");
         for (int i = 0; i < referenceBook.Count; i++)
         {
             WriteReferenceBook(referenceBook[i]);
@@ -472,21 +576,6 @@ internal class Program
         Console.ResetColor();
     }
     #endregion
-
-    static void AddToDataBase()
-    {
-
-    }
-
-    static void EditInDataBase()
-    {
-
-    }
-
-    static void DeleteInDataBase()
-    {
-
-    }
 
     static void SortStudentsByFullName()
     {
