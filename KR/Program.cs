@@ -32,11 +32,11 @@ internal class Program
     {
         public long numberOfRegistration;
         public DateOnly dateOfRegistration;
-        public short IDOfType;
-        public short IDOfUDC;
+        public int IDOfType;
+        public int IDOfUDC;
         public string fullNameOfAuthor;
         public string title;
-        public short IDOfFullNameOfReviewer;
+        public int IDOfFullNameOfReviewer;
         public int journalNumber;
         public DateOnly magazineReleaseDate;
     }
@@ -89,6 +89,60 @@ internal class Program
                        swReferenceBookOfFullNameOfReviewer, referenceBookOfFullNameOfReviewer);
     }
 
+    static void MainMenu(List<Publication> publications,
+                         List<ReferenceBook> referenceBookOfType,
+                         List<ReferenceBook> referenceBookOfUDC,
+                         List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+    {
+        while (true)
+        {
+            Console.WriteLine("Выберете один из вариантов работы с Базой данных:");
+            Console.WriteLine("1) Редактирование БД");
+            Console.WriteLine("2) Редактирование справочников");
+            Console.WriteLine("3) Вывод данных");
+            Console.WriteLine("4) Поиск в БД");
+            Console.WriteLine("5) Сортировка записей");
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("6) Востановить данные из резервного файла");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("0) Сохранить и выйти");
+            Console.ResetColor();
+            if (IsValidOption(out int option))
+            {
+                Console.Clear();
+                switch (option)
+                {
+                    case 1:
+                        EditDBMenu(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 2:
+                        EditReferenceBooksMenu(referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 3:
+                        OutputMenu(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 4:
+                        SearchMenu(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 5:
+                        SortMenu(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 6:
+                        RecoverDataFromFile(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 0:
+                        Console.WriteLine("Выход из программы");
+                        return;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Отсутствует опция под номером {option}");
+                        Console.ResetColor();
+                        break;
+                }
+            }
+        }
+    }
+
     #region Read
     static List<Publication> ReadPublicationsFromFile(StreamReader srPublication)
     {
@@ -133,60 +187,6 @@ internal class Program
         return referenceBook;
     }
     #endregion
-
-    static void MainMenu(List<Publication> publications,
-                         List<ReferenceBook> referenceBookOfType,
-                         List<ReferenceBook> referenceBookOfUDC,
-                         List<ReferenceBook> referenceBookOfFullNameOfReviewer)
-    {
-        while (true)
-        {
-            Console.WriteLine("Выберете один из вариантов работы с Базой данных:");
-            Console.WriteLine("1) Редактирование БД");
-            Console.WriteLine("2) Редактирование справочников");
-            Console.WriteLine("3) Вывод данных");
-            Console.WriteLine("4) Поиск в БД");
-            Console.WriteLine("5) Сортировка записей");
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("6) Востановить данные из резервного файла");
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("0) Сохранить и выйти");
-            Console.ResetColor();
-            if (IsValidOption(out int option))
-            {
-                Console.Clear();
-                switch (option)
-                {
-                    case 1:
-                        EditDBMenu(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
-                        break;
-                    case 2:
-                        EditReferenceBooksMenu(referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
-                        break;
-                    case 3:
-                        OutputMenu(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
-                        break;
-                    case 4:
-                        SearchMenu();
-                        break;
-                    case 5:
-                        SortMenu();
-                        break;
-                    case 6:
-                        RecoverDataFromFile(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
-                        break;
-                    case 0:
-                        Console.WriteLine("Выход из программы");
-                        return;
-                    default:
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"Отсутствует опция под номером {option}");
-                        Console.ResetColor();
-                        break;
-                }
-            }
-        }
-    }
 
     #region Edit
     static void EditDBMenu(List<Publication> publications,
@@ -561,10 +561,11 @@ internal class Program
 
 
     static void WritePublication(List<Publication> publications, //лучше перегрузка или два отдельных метода?
-                                  List<ReferenceBook> referenceBookOfType,
-                                  List<ReferenceBook> referenceBookOfUDC,
-                                  List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+                                 List<ReferenceBook> referenceBookOfType,
+                                 List<ReferenceBook> referenceBookOfUDC,
+                                 List<ReferenceBook> referenceBookOfFullNameOfReviewer)
     {
+        Console.WriteLine(publications.Count);
         for (int i = 0; i < publications.Count; i++)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -615,15 +616,251 @@ internal class Program
     }
     #endregion
 
-    static void SearchMenu()
+    #region Search
+    static void SearchMenu(List<Publication> publications,
+                           List<ReferenceBook> referenceBookOfType,
+                           List<ReferenceBook> referenceBookOfUDC,
+                           List<ReferenceBook> referenceBookOfFullNameOfReviewer)
     {
+        bool flag = true;
+        List<Publication> result;
+        while (flag)
+        {
+            Console.WriteLine("Выберете один из вариантов поиска:");
+            Console.WriteLine("1) По дате регистрации");
+            Console.WriteLine("2) По типу публикации");
+            Console.WriteLine("3) По УДК");
+            Console.WriteLine("4) По названию");
+            Console.WriteLine("5) По номеру журнала");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("0) Назад");
+            Console.ResetColor();
+            if (IsValidOption(out int option))
+            {
+                Console.Clear();
+                switch (option)
+                {
+                    case 1:
+                        DateOnly startDate = new DateOnly(), endDate = new DateOnly();
+                        Console.Clear();
+                        do
+                        {
+                            Console.WriteLine("Введите с какой даты искать");
+                        } while (!IsValid(out startDate));
+                        Console.Clear();
+                        do
+                        {
+                            Console.WriteLine("Введите до какой даты искать");
+                        } while (!IsValid(out endDate));
 
+                        result = FindAllPublicationByRegestrationDate(publications, startDate, endDate);
+                        Console.Clear();
+                        if (result.Count() == 0)
+                        {
+                            Console.WriteLine("Не найдёно ни одной записи соответствующей поиску :(");
+                        }
+                        else
+                        {
+                            WritePublication(result, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        }
+                        break;
+                    case 2:
+                        int typeOfPublication = GetChosenIDOfReferenceBook(referenceBookOfType, "Тип публикации");
+
+                        result = FindAllPublicationByType(publications, typeOfPublication);
+                        Console.Clear();
+                        if (result.Count == 0)
+                        {
+                            Console.WriteLine("Не найдёно ни одной записи соответствующей поиску :(");
+                        }
+                        else
+                        {
+                            WritePublication(result, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        }
+                        break;
+                    case 3:
+                        int UDC = GetChosenIDOfReferenceBook(referenceBookOfUDC, "Тип публикации");
+
+                        result = FindAllPublicationByUDC(publications, UDC);
+                        Console.Clear();
+                        if (result.Count == 0)
+                        {
+                            Console.WriteLine("Не найдёно ни одной записи соответствующей поиску :(");
+                        }
+                        else
+                        {
+                            WritePublication(result, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        }
+                        break;
+                    case 4:
+                        string text;
+                        Console.Clear();
+                        do
+                        {
+                            Console.WriteLine("Введите что искать в названии статьи");
+                        } while (!IsntNullWithConsoleOutput(out text!));
+
+                        result = FindAllPublicationByTitle(publications, text);
+                        Console.Clear();
+                        if (result.Count == 0)
+                        {
+                            Console.WriteLine("Не найдёно ни одной записи соответствующей поиску :(");
+                        }
+                        else
+                        {
+                            WritePublication(result, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        }
+                        break;
+                    case 5:
+                        int journalNumber;
+                        Console.Clear();
+                        do
+                        {
+                            Console.WriteLine("Введите номер журнала");
+                        } while (!IsValid(out journalNumber));
+
+                        result = FindAllPublicationByJournalNumber(publications, journalNumber);
+                        Console.Clear();
+                        if (result.Count == 0)
+                        {
+                            Console.WriteLine("Не найдёно ни одной записи соответствующей поиску :(");
+                        }
+                        else
+                        {
+                            WritePublication(result, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        }
+                        break;
+                    case 0:
+                        flag = false;
+                        return;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Отсутствует опция под номером {option}");
+                        Console.ResetColor();
+                        break;
+                }
+            }
+        }
+    }
+    static List<Publication> FindAllPublicationByRegestrationDate(List<Publication> publications, DateOnly startDate, DateOnly endDate)
+    {
+        return publications.FindAll(x => x.dateOfRegistration >= startDate && x.dateOfRegistration <= endDate);
+    }
+    private static List<Publication> FindAllPublicationByType(List<Publication> publications, int typeOfPublication)
+    {
+        return publications.FindAll(x => x.IDOfType == typeOfPublication);
+    }
+    private static List<Publication> FindAllPublicationByUDC(List<Publication> publications, int UDC)
+    {
+        return publications.FindAll(x => x.IDOfUDC == UDC);
+    }
+    private static List<Publication> FindAllPublicationByTitle(List<Publication> publications, string text)
+    {
+        return publications.FindAll(x => x.title.ToLower().Contains(text.ToLower()));
+    }
+    private static List<Publication> FindAllPublicationByJournalNumber(List<Publication> publications, int journalNumber)
+    {
+        return publications.FindAll(x => x.journalNumber == journalNumber);
+    }
+    #endregion
+
+    #region Sort
+    static void SortMenu(List<Publication> publications,
+                         List<ReferenceBook> referenceBookOfType,
+                         List<ReferenceBook> referenceBookOfUDC,
+                         List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+    {
+        bool flag = true;
+        while (flag)
+        {
+            Console.WriteLine("Выберете один из вариантов поиска:");
+            Console.WriteLine("1) По дате регистрации");
+            Console.WriteLine("2) По типу публикации");
+            Console.WriteLine("3) По УДК");
+            Console.WriteLine("4) По ФИО автора");
+            Console.WriteLine("5) По названию");
+            Console.WriteLine("6) По номеру журнала");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("0) Назад");
+            Console.ResetColor();
+            if (IsValidOption(out int option))
+            {
+                Console.Clear();
+                switch (option)
+                {
+                    case 1:
+                        SortPublicationByRegestrationDate(publications);
+                        Console.Clear();
+                        WritePublication(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 2:
+                        SortPublicationByType(publications);
+                        Console.Clear();
+                        WritePublication(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 3:
+                        SortPublicationByUDC(publications);
+                        Console.Clear();
+                        WritePublication(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 4:
+                        SortPublicationByFullNameOfAuthor(publications);
+                        Console.Clear();
+                        WritePublication(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 5:
+                        SortPublicationByTitle(publications);
+                        Console.Clear();
+                        WritePublication(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 6:
+                        SortPublicationByJournalNumber(publications);
+                        Console.Clear();
+                        WritePublication(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 0:
+                        flag = false;
+                        return;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Отсутствует опция под номером {option}");
+                        Console.ResetColor();
+                        break;
+                }
+            }
+        }
     }
 
-    static void SortMenu()
+    private static void SortPublicationByRegestrationDate(List<Publication> publications)
     {
-
+        publications.Sort((x, y) => x.numberOfRegistration.CompareTo(y.numberOfRegistration));
     }
+
+    private static void SortPublicationByType(List<Publication> publications)
+    {
+        publications.Sort((x, y) => x.IDOfType.CompareTo(y.IDOfType));
+    }
+
+    private static void SortPublicationByUDC(List<Publication> publications)
+    {
+        publications.Sort((x, y) => x.IDOfUDC.CompareTo(y.IDOfUDC));
+    }
+
+    private static void SortPublicationByFullNameOfAuthor(List<Publication> publications)
+    {
+        publications.Sort((x, y) => x.fullNameOfAuthor.CompareTo(y.fullNameOfAuthor));
+    }
+
+    private static void SortPublicationByTitle(List<Publication> publications)
+    {
+        publications.Sort((x, y) => x.title.CompareTo(y.title));
+    }
+
+    private static void SortPublicationByJournalNumber(List<Publication> publications)
+    {
+        publications.Sort((x, y) => x.journalNumber.CompareTo(y.journalNumber));
+    }
+    #endregion
 
     #region Save and Recover
     static void SaveAllChanges(StreamWriter swOfPublications, List<Publication> publications,
@@ -696,45 +933,7 @@ internal class Program
     }
     #endregion
 
-    static void SortStudentsByFullName()
-    {
-
-    }
-
-    #region short
-    static bool IsValid(out short option, int? start = null, int? end = null)
-    {
-        if (short.TryParse(Console.ReadLine(), out option) && (start == null || option >= start) && (end == null || option <= end))
-        {
-            return true;
-        }
-        else
-        {
-            Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Неверный ввод, повторите попытку ввода");
-            Console.ResetColor();
-            return false;
-        }
-    }
-    static bool IsValidOrNull(out short option, int? start = null, int? end = null)
-    {
-        string? input = Console.ReadLine();
-        option = -1;
-        if (input == null || input.Length == 0 || short.TryParse(input, out option) && (start == null || option >= start) && (end == null || option <= end))
-        {
-            return true;
-        }
-        else
-        {
-            Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Неверный ввод, повторите попытку ввода");
-            Console.ResetColor();
-            return false;
-        }
-    }
-    #endregion
+    #region IsVAlid
 
     #region int
     static bool IsValid(out int option, int? start = null, int? end = null)
@@ -897,7 +1096,9 @@ internal class Program
             return false;
         }
     }
+    #endregion
 
+    #region Get
     static int GetNewId(List<ReferenceBook> list)
     {
         int number = -1;
@@ -911,9 +1112,9 @@ internal class Program
         return number;
     }
 
-    static short GetChosenIDOfReferenceBook(List<ReferenceBook> referenceBook, string text)
+    static int GetChosenIDOfReferenceBook(List<ReferenceBook> referenceBook, string text)
     {
-        short chosenOne = -1;
+        int chosenOne = -1;
         do
         {
             Console.Clear();
@@ -923,6 +1124,7 @@ internal class Program
                 Console.WriteLine($"{i + 1}) {referenceBook[i].title}");
             }
         } while (!IsValid(out chosenOne, 1, referenceBook.Count));
-        return Convert.ToInt16(chosenOne - 1);
+        return chosenOne - 1;
     }
+    #endregion
 }
