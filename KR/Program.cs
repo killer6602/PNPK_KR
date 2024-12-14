@@ -28,10 +28,11 @@ internal class Program
         Console.ResetColor();
         Console.Clear();
 
-        StreamReader srReferenceBookOfType = new StreamReader("..\\..\\..\\DataFiles\\ReferenceBookOfType.txt"),
-            srReferenceBookOfUDC = new StreamReader("..\\..\\..\\DataFiles\\ReferenceBookOfUDC.txt"),
-            srReferenceBookOfFullNameOfReviewer = new StreamReader("..\\..\\..\\DataFiles\\ReferenceBookOfFullNameOfReviewer.txt"),
-            srPublication = new StreamReader("..\\..\\..\\DataFiles\\Publications.txt");
+        StreamReader streamReader = new("..\\..\\..\\DataFiles\\ReferenceBookOfFullNameOfReviewer.txt");
+        StreamReader srReferenceBookOfType = new("..\\..\\..\\DataFiles\\ReferenceBookOfType.txt"),
+            srReferenceBookOfUDC = new("..\\..\\..\\DataFiles\\ReferenceBookOfUDC.txt"),
+            srReferenceBookOfFullNameOfReviewer = streamReader,
+            srPublication = new("..\\..\\..\\DataFiles\\Publications.txt");
         List<Publication> publications = ReadPublicationsFromFile(srPublication);
         List<ReferenceBook> referenceBookOfType = ReadReferenceBookFromFile(srReferenceBookOfType),
             referenceBookOfUDC = ReadReferenceBookFromFile(srReferenceBookOfUDC),
@@ -41,10 +42,11 @@ internal class Program
         srReferenceBookOfUDC.Close();
         srReferenceBookOfFullNameOfReviewer.Close();
 
-        StreamWriter swReservReferenceBookOfType = new StreamWriter("..\\..\\..\\DataFiles\\ReservFiles\\ReferenceBookOfType.txt"),
-            swReservReferenceBookOfUDC = new StreamWriter("..\\..\\..\\DataFiles\\ReservFiles\\ReferenceBookOfUDC.txt"),
-            swReservReferenceBookOfFullNameOfReviewer = new StreamWriter("..\\..\\..\\DataFiles\\ReservFiles\\ReferenceBookOfFullNameOfReviewer.txt"),
-            swReservPublication = new StreamWriter("..\\..\\..\\DataFiles\\ReservFiles\\Publications.txt");
+        StreamWriter streamWriter = new("..\\..\\..\\DataFiles\\ReservFiles\\ReferenceBookOfFullNameOfReviewer.txt");
+        StreamWriter swReservReferenceBookOfType = new("..\\..\\..\\DataFiles\\ReservFiles\\ReferenceBookOfType.txt"),
+            swReservReferenceBookOfUDC = new("..\\..\\..\\DataFiles\\ReservFiles\\ReferenceBookOfUDC.txt"),
+            swReservReferenceBookOfFullNameOfReviewer = streamWriter,
+            swReservPublication = new("..\\..\\..\\DataFiles\\ReservFiles\\Publications.txt");
         SaveAllChanges(swReservPublication, publications,
                        swReservReferenceBookOfType, referenceBookOfType,
                        swReservReferenceBookOfUDC, referenceBookOfUDC,
@@ -52,10 +54,10 @@ internal class Program
 
         MainMenu(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
 
-        StreamWriter swReferenceBookOfType = new StreamWriter("..\\..\\..\\DataFiles\\ReferenceBookOfType.txt"),
-            swReferenceBookOfUDC = new StreamWriter("..\\..\\..\\DataFiles\\ReferenceBookOfUDC.txt"),
-            swReferenceBookOfFullNameOfReviewer = new StreamWriter("..\\..\\..\\DataFiles\\ReferenceBookOfFullNameOfReviewer.txt"),
-            swPublication = new StreamWriter("..\\..\\..\\DataFiles\\Publications.txt");
+        StreamWriter swReferenceBookOfType = new("..\\..\\..\\DataFiles\\ReferenceBookOfType.txt"),
+            swReferenceBookOfUDC = new("..\\..\\..\\DataFiles\\ReferenceBookOfUDC.txt"),
+            swReferenceBookOfFullNameOfReviewer = new("..\\..\\..\\DataFiles\\ReferenceBookOfFullNameOfReviewer.txt"),
+            swPublication = new("..\\..\\..\\DataFiles\\Publications.txt");
         SaveAllChanges(swPublication, publications,
                        swReferenceBookOfType, referenceBookOfType,
                        swReferenceBookOfUDC, referenceBookOfUDC,
@@ -105,7 +107,7 @@ internal class Program
                         ReportMenu(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
                         break;
                     case 7:
-                        RecoverDataFromFile(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        RecoverDataFromFile(ref publications, ref referenceBookOfType, ref referenceBookOfUDC, ref referenceBookOfFullNameOfReviewer);
                         break;
                     case 0:
                         Console.WriteLine("Выход из программы");
@@ -168,10 +170,10 @@ internal class Program
                                             List<ReferenceBook> referenceBookOfUDC, 
                                             string path)
     {
-        StreamWriter sw = new StreamWriter(path, false, Encoding.UTF8);
+        StreamWriter sw = new(path, false, Encoding.UTF8);
         List<Publication> publicationsCopy = publications;
         SortPublicationByJournalNumber(publicationsCopy);
-        List<int> journalNumberVariaty = new List<int>();
+        List<int> journalNumberVariaty = [];
         for (int i = 0; i < publicationsCopy.Count; i++)
         {
             if (!journalNumberVariaty.Exists(x => x == publicationsCopy[i].journalNumber))
@@ -213,10 +215,10 @@ internal class Program
                                      List<ReferenceBook> referenceBookOfUDC, 
                                      string path)
     {
-        StreamWriter sw = new StreamWriter(path, false, Encoding.UTF8);
+        StreamWriter sw = new(path, false, Encoding.UTF8);
         List<Publication> publicationsCopy = publications;
         SortPublicationByFullNameOfAuthor(publications);
-        List<string> fullNameOfAuthorVariaty = new List<string>();
+        List<string> fullNameOfAuthorVariaty = [];
         for (int i = 0; i < publicationsCopy.Count; i++)
         {
             if (!fullNameOfAuthorVariaty.Exists(x => x == publicationsCopy[i].fullNameOfAuthor))
@@ -255,10 +257,10 @@ internal class Program
                                        List<ReferenceBook> referenceBookOfFullNameOfReviewer,
                                        string path)
     {
-        StreamWriter sw = new StreamWriter(path, false, Encoding.UTF8);
+        StreamWriter sw = new(path, false, Encoding.UTF8);
         List<Publication> publicationsCopy = publications;
         SortPublicationByFullNameOfReviewer(publicationsCopy, referenceBookOfFullNameOfReviewer);
-        List<string> fullNameOfReviewerVariaty = new List<string>();
+        List<string> fullNameOfReviewerVariaty = [];
         for (int i = 0; i < publicationsCopy.Count; i++)
         {
             if (!fullNameOfReviewerVariaty.Exists(x => x == referenceBookOfFullNameOfReviewer.Find(x => x.ID == publicationsCopy[i].IDOfFullNameOfReviewer).title))
@@ -303,7 +305,7 @@ internal class Program
         int n = srPublication.ReadToEnd().Split('\n').Length / type.GetFields().Length;//получение количества объектов в файле
         srPublication.BaseStream.Position = 0;//возвращение указателя StreamReader в начало файла
 
-        List<Publication> publications = new List<Publication>();
+        List<Publication> publications = [];
         for (int i = 0; i < n; i++)
         {
             publications.Add(ReadPublicationFromFile(srPublication));
@@ -312,16 +314,18 @@ internal class Program
     }
     static Publication ReadPublicationFromFile(StreamReader srPublication)//нету проверок т.к. файл доверенный источник и в нём нет ошибок
     {
-        Publication publication = new Publication();
-        publication.numberOfRegistration = Convert.ToInt64(srPublication.ReadLine());
-        publication.dateOfRegistration = DateOnly.Parse(srPublication.ReadLine()!);
-        publication.IDOfType = Convert.ToInt16(srPublication.ReadLine());
-        publication.IDOfUDC = Convert.ToInt16(srPublication.ReadLine());
-        publication.fullNameOfAuthor = srPublication.ReadLine()!;
-        publication.title = srPublication.ReadLine()!;
-        publication.IDOfFullNameOfReviewer = Convert.ToInt16(srPublication.ReadLine());
-        publication.journalNumber = Convert.ToInt32(srPublication.ReadLine());
-        publication.magazineReleaseDate = DateOnly.Parse(srPublication.ReadLine()!);
+        Publication publication = new()
+        {
+            numberOfRegistration = Convert.ToInt64(srPublication.ReadLine()),
+            dateOfRegistration = DateOnly.Parse(srPublication.ReadLine()!),
+            IDOfType = Convert.ToInt16(srPublication.ReadLine()),
+            IDOfUDC = Convert.ToInt16(srPublication.ReadLine()),
+            fullNameOfAuthor = srPublication.ReadLine()!,
+            title = srPublication.ReadLine()!,
+            IDOfFullNameOfReviewer = Convert.ToInt16(srPublication.ReadLine()),
+            journalNumber = Convert.ToInt32(srPublication.ReadLine()),
+            magazineReleaseDate = DateOnly.Parse(srPublication.ReadLine()!)
+        };
         return publication;
     }
     static List<ReferenceBook> ReadReferenceBookFromFile(StreamReader srReferenceBook)
@@ -329,7 +333,7 @@ internal class Program
         int n = srReferenceBook.ReadToEnd().Split('\n').Length;//получение количества объектов в файле
         srReferenceBook.BaseStream.Position = 0;//возвращение указателя StreamReader в начало файла
 
-        List<ReferenceBook> referenceBook = new List<ReferenceBook>();
+        List<ReferenceBook> referenceBook = [];
         ReferenceBook item;
         for (int i = 0; i < n; i++)
         {
@@ -404,7 +408,7 @@ internal class Program
                                                   List<ReferenceBook> referenceBookOfFullNameOfReviewer)
     {
         Regex pattern = new(@"([А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\b)|([A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\b)");
-        Publication newPublication = new Publication();
+        Publication newPublication = new();
 
         long number;
         Console.Clear();
@@ -465,7 +469,7 @@ internal class Program
                                                                List<ReferenceBook> referenceBookOfFullNameOfReviewer)
     {
         Regex pattern = new(@"([А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\b)|([A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\b)");
-        Publication newPublication = new Publication();
+        Publication newPublication = new();
 
         long number;
         Console.Clear();
@@ -502,7 +506,7 @@ internal class Program
             Console.WriteLine($"На данный момент: {publication.fullNameOfAuthor}");
             Console.ResetColor();
         } while (!IsValidByRegexOrNull(out text!, pattern));
-        newPublication.fullNameOfAuthor = text == null ? publication.fullNameOfAuthor : text;
+        newPublication.fullNameOfAuthor = text ?? publication.fullNameOfAuthor;
 
         Console.Clear();
         do
@@ -512,7 +516,7 @@ internal class Program
             Console.WriteLine($"На данный момент: {publication.title}");
             Console.ResetColor();
         } while (!IsntNullWithConsoleOutput(out text!));
-        newPublication.title = text == null ? publication.title : text;
+        newPublication.title = text ?? publication.title;
 
         newPublication.IDOfFullNameOfReviewer = GetChosenIDOfReferenceBook(referenceBookOfFullNameOfReviewer, "ФИО рецензента");
 
@@ -639,8 +643,8 @@ internal class Program
                                                       string name, 
                                                       string pattern = @"\w")
     {
-        Regex regex = new Regex(pattern);
-        ReferenceBook newReferenceBook = new ReferenceBook();
+        Regex regex = new(pattern);
+        ReferenceBook newReferenceBook = new();
         string text;
         Console.Clear();
         do
@@ -656,8 +660,8 @@ internal class Program
                                                                    string name,
                                                                    string pattern = @"\w")
     {
-        Regex regex = new Regex(pattern);
-        ReferenceBook newReferenceBook = new ReferenceBook();
+        Regex regex = new(pattern);
+        ReferenceBook newReferenceBook = new();
         string? text;
         Console.Clear();
         do
@@ -709,7 +713,7 @@ internal class Program
                         break;
                     case 0:
                         flag = false;
-                        return;
+                        break;
                     default:
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine($"Отсутствует опция под номером {option}");
@@ -801,7 +805,7 @@ internal class Program
                 switch (option)
                 {
                     case 1:
-                        DateOnly startDate = new DateOnly(), endDate = new DateOnly();
+                        DateOnly startDate, endDate;
                         Console.Clear();
                         do
                         {
@@ -815,7 +819,7 @@ internal class Program
 
                         result = FindAllPublicationByRegestrationDate(publications, startDate, endDate);
                         Console.Clear();
-                        if (result.Count() == 0)
+                        if (result.Count == 0)
                         {
                             Console.WriteLine("Не найдёно ни одной записи соответствующей поиску :(");
                         }
@@ -892,7 +896,7 @@ internal class Program
                         break;
                     case 0:
                         flag = false;
-                        return;
+                        break;
                     default:
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine($"Отсутствует опция под номером {option}");
@@ -980,7 +984,7 @@ internal class Program
                         break;
                     case 0:
                         flag = false;
-                        return;
+                        break;
                     default:
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine($"Отсутствует опция под номером {option}");
@@ -1073,15 +1077,15 @@ internal class Program
         swOfReferenceBook.Close();
     }
 
-    static void RecoverDataFromFile(List<Publication> publications,
-                                    List<ReferenceBook> referenceBookOfType,
-                                    List<ReferenceBook> referenceBookOfUDC,
-                                    List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+    static void RecoverDataFromFile(ref List<Publication> publications,
+                                    ref List<ReferenceBook> referenceBookOfType,
+                                    ref List<ReferenceBook> referenceBookOfUDC,
+                                    ref List<ReferenceBook> referenceBookOfFullNameOfReviewer)
     {
-        StreamReader srReservReferenceBookOfType = new StreamReader("..\\..\\..\\DataFiles\\ReferenceBookOfType.txt"),
-            srReservReferenceBookOfUDC = new StreamReader("..\\..\\..\\DataFiles\\ReferenceBookOfUDC.txt"),
-            srReservReferenceBookOfFullNameOfReviewer = new StreamReader("..\\..\\..\\DataFiles\\ReferenceBookOfFullNameOfReviewer.txt"),
-            srReservPublication = new StreamReader("..\\..\\..\\DataFiles\\Publications.txt");
+        StreamReader srReservReferenceBookOfType = new("..\\..\\..\\DataFiles\\ReferenceBookOfType.txt"),
+            srReservReferenceBookOfUDC = new("..\\..\\..\\DataFiles\\ReferenceBookOfUDC.txt"),
+            srReservReferenceBookOfFullNameOfReviewer = new("..\\..\\..\\DataFiles\\ReferenceBookOfFullNameOfReviewer.txt"),
+            srReservPublication = new("..\\..\\..\\DataFiles\\Publications.txt");
         publications = ReadPublicationsFromFile(srReservPublication);
         referenceBookOfType = ReadReferenceBookFromFile(srReservReferenceBookOfType);
         referenceBookOfUDC = ReadReferenceBookFromFile(srReservReferenceBookOfUDC);
@@ -1165,7 +1169,7 @@ internal class Program
     #endregion
 
     #region DateOnly
-    static bool IsValid(out DateOnly output, int? start = null, int? end = null)
+    static bool IsValid(out DateOnly output)
     {
         if (DateOnly.TryParse(Console.ReadLine(), out output))
         {
@@ -1180,7 +1184,7 @@ internal class Program
             return false;
         }
     }
-    static bool IsValidOrNull(out DateOnly output, int? start = null, int? end = null)
+    static bool IsValidOrNull(out DateOnly output)
     {
         string? input = Console.ReadLine();
         output = new DateOnly(1, 1, 1);
@@ -1273,7 +1277,7 @@ internal class Program
 
     static int GetChosenIDOfReferenceBook(List<ReferenceBook> referenceBook, string text)
     {
-        int chosenOne = -1;
+        int chosenOne;
         do
         {
             Console.Clear();
