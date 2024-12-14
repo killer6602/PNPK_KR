@@ -1,32 +1,7 @@
-﻿using System.Runtime.InteropServices;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 internal class Program
 {
-    //обработчик событий который позволяет отслеживать закрытие программы любым способом
-    #region Trap application termination
-    [DllImport("Kernel32")]
-    private static extern bool SetConsoleCtrlHandler(EventHandler handler, bool add);
-
-    private delegate bool EventHandler(CtrlType sig);
-    static EventHandler? _handler;
-
-    enum CtrlType
-    {
-        CTRL_C_EVENT = 0,
-        CTRL_BREAK_EVENT = 1,
-        CTRL_CLOSE_EVENT = 2,
-        CTRL_LOGOFF_EVENT = 5,
-        CTRL_SHUTDOWN_EVENT = 6
-    }
-
-    private static bool Handler(CtrlType sig)
-    {
-        //Console.Beep();
-        Environment.Exit(-1);
-        return true;
-    }
-    #endregion
 
     struct Publication
     {
@@ -47,10 +22,8 @@ internal class Program
         public string title;
     }
 
-    private static void Main()
+    static void Main()
     {
-        _handler += new EventHandler(Handler);
-        SetConsoleCtrlHandler(_handler, true);
         Console.OutputEncoding = Encoding.UTF8;
         Console.ResetColor();
         Console.Clear();
@@ -190,7 +163,10 @@ internal class Program
         }
     }
 
-    private static void CreateReportByJournalNumber(List<Publication> publications, List<ReferenceBook> referenceBookOfType, List<ReferenceBook> referenceBookOfUDC, string path)
+    static void CreateReportByJournalNumber(List<Publication> publications, 
+                                            List<ReferenceBook> referenceBookOfType,
+                                            List<ReferenceBook> referenceBookOfUDC, 
+                                            string path)
     {
         StreamWriter sw = new StreamWriter(path, false, Encoding.UTF8);
         List<Publication> publicationsCopy = publications;
@@ -212,17 +188,17 @@ internal class Program
             sw.WriteLine(new string('▬', 120));
             sw.WriteLine();
             sw.WriteLine(journalNumberVariaty[i]);
-            sw.WriteLine(new string('-', 107));
-            sw.WriteLine("|  № |                  ФИО автора                  | УДК | Тип публикации |           Название           |");
-            sw.WriteLine(new string('-', 107));
+            sw.WriteLine(new string('-', 115));
+            sw.WriteLine("|  № |                  ФИО автора                  | УДК |     Тип публикации     |           Название           |");
+            sw.WriteLine(new string('-', 115));
             for (int j = 0; j < result.Count; j++)
             {
                 sw.WriteLine($"|{j + 1:D4}|" +
                     $"{new String(' ', (47 - result[j].fullNameOfAuthor.Length) / 2) + result[j].fullNameOfAuthor + new String(' ', (46 - result[j].fullNameOfAuthor.Length) / 2)}|" +
                     $" {referenceBookOfUDC.Find(x => x.ID == result[j].IDOfUDC).title} |" +
-                    $"{new String(' ', (17 - referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title.Length) / 2) + referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title + new String(' ', (16 - referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title.Length) / 2)}|" +
+                    $"{new String(' ', (25 - referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title.Length) / 2) + referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title + new String(' ', (24 - referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title.Length) / 2)}|" +
                     $"{(result[j].title.Trim(' ').Length > 30 ? (result[j].title.Substring(0, 27).Trim() + new string('.', 30 - result[j].title.Substring(0, 27).Trim().Length)) : new String(' ', (30 - result[j].title.Length) / 2) + result[j].title + new String(' ', (31 - result[j].title.Length) / 2))}|");
-                sw.WriteLine(new string('-', 107));
+                sw.WriteLine(new string('-', 115));
             }
             sw.WriteLine();
             sw.WriteLine(new string('▬', 120));
@@ -232,7 +208,10 @@ internal class Program
         sw.Close();
     }
 
-    private static void CreateReportByAuthor(List<Publication> publications, List<ReferenceBook> referenceBookOfType, List<ReferenceBook> referenceBookOfUDC, string path)
+    static void CreateReportByAuthor(List<Publication> publications, 
+                                     List<ReferenceBook> referenceBookOfType, 
+                                     List<ReferenceBook> referenceBookOfUDC, 
+                                     string path)
     {
         StreamWriter sw = new StreamWriter(path, false, Encoding.UTF8);
         List<Publication> publicationsCopy = publications;
@@ -252,17 +231,17 @@ internal class Program
             sw.WriteLine(new string('▬', 120));
             sw.WriteLine();
             sw.WriteLine(fullNameOfAuthorVariaty[i]);
-            sw.WriteLine(new string('-', 76));
-            sw.WriteLine("|  № | УДК | Тип публикации |           Название           | Номер журнала |");
-            sw.WriteLine(new string('-', 76));
+            sw.WriteLine(new string('-', 84));
+            sw.WriteLine("|  № | УДК |     Тип публикации     |           Название           | Номер журнала |");
+            sw.WriteLine(new string('-', 84));
             for (int j = 0; j < result.Count; j++)
             {
                 sw.WriteLine($"|{j + 1:D4}|" +
                     $" {referenceBookOfUDC.Find(x => x.ID == result[j].IDOfUDC).title} |" +
-                    $"{new String(' ', (17 - referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title.Length) / 2) + referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title + new String(' ', (16 - referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title.Length) / 2)}|" +
+                    $"{new String(' ', (25 - referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title.Length) / 2) + referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title + new String(' ', (24 - referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title.Length) / 2)}|" +
                     $"{(result[j].title.Trim(' ').Length > 30 ? (result[j].title.Substring(0, 27).Trim() + new string('.', 30 - result[j].title.Substring(0, 27).Trim().Length)) : new String(' ', (30 - result[j].title.Length) / 2) + result[j].title + new String(' ', (31 - result[j].title.Length) / 2))}|" +
                     $"{new String(' ', (16 - result[j].journalNumber.ToString().Length) / 2) + result[j].journalNumber + new String(' ', (15 - result[j].journalNumber.ToString().Length) / 2)}|");
-                sw.WriteLine(new string('-', 76));
+                sw.WriteLine(new string('-', 84));
             }
             sw.WriteLine();
             sw.WriteLine(new string('▬', 120));
@@ -272,7 +251,9 @@ internal class Program
         sw.Close();
     }
 
-    private static void CreateReportByReviewer(List<Publication> publications, List<ReferenceBook> referenceBookOfFullNameOfReviewer, string path)
+    static void CreateReportByReviewer(List<Publication> publications, 
+                                       List<ReferenceBook> referenceBookOfFullNameOfReviewer,
+                                       string path)
     {
         StreamWriter sw = new StreamWriter(path, false, Encoding.UTF8);
         List<Publication> publicationsCopy = publications;
@@ -297,7 +278,7 @@ internal class Program
             sw.WriteLine(new string('-', 35));
             for (int j = 0; j < result.Count; j++)
             {
-                if(j>0 && result[j].journalNumber == result[j - 1].journalNumber)
+                if (j > 0 && result[j].journalNumber == result[j - 1].journalNumber)
                 {
                     continue;
                 }
@@ -479,9 +460,9 @@ internal class Program
         return newPublication;
     }
     static Publication ReadPublicationFromConsoleOrLeaveAsItIs(Publication publication,
-                                                  List<ReferenceBook> referenceBookOfType,
-                                                  List<ReferenceBook> referenceBookOfUDC,
-                                                  List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+                                                               List<ReferenceBook> referenceBookOfType,
+                                                               List<ReferenceBook> referenceBookOfUDC,
+                                                               List<ReferenceBook> referenceBookOfFullNameOfReviewer)
     {
         Regex pattern = new(@"([А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\b)|([A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\b)");
         Publication newPublication = new Publication();
@@ -582,10 +563,11 @@ internal class Program
                         EditChosenReferenceBooksMenu(referenceBookOfType, "Тип публикации");
                         break;
                     case 2:
-                        EditChosenReferenceBooksMenu(referenceBookOfUDC, "УДК");
+                        EditChosenReferenceBooksMenu(referenceBookOfUDC, "УДК", @"\b\d{3}\b");
                         break;
                     case 3:
-                        EditChosenReferenceBooksMenu(referenceBookOfFullNameOfReviewer, "ФИО рецензента");
+                        EditChosenReferenceBooksMenu(referenceBookOfFullNameOfReviewer, "ФИО рецензента",
+                            @"([А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\s{1}[А-Я]{1}[а-я]{1,}\b)|([A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\s{1}[A-Z]{1}[a-z]{1,}\b)");
                         break;
                     case 0:
                         flag = false;
@@ -599,7 +581,9 @@ internal class Program
             }
         }
     }
-    static void EditChosenReferenceBooksMenu(List<ReferenceBook> referenceBook, string text)
+    static void EditChosenReferenceBooksMenu(List<ReferenceBook> referenceBook, 
+                                             string text, 
+                                             string pattern = @"\w")
     {
         bool flag = true;
         while (flag)
@@ -618,7 +602,7 @@ internal class Program
                 switch (option)
                 {
                     case 1:
-                        ReferenceBook newReferenceBook = ReadReferenceBookFromConsole(referenceBook);
+                        ReferenceBook newReferenceBook = ReadReferenceBookFromConsole(referenceBook, text, pattern);
                         referenceBook.Add(newReferenceBook);
                         break;
                     case 2:
@@ -628,7 +612,7 @@ internal class Program
                             WriteReferenceBook(referenceBook, text);
                             Console.WriteLine($"Введите ID справочника который хотите изменить");
                         } while (!IsValid(out option) || !referenceBook.Exists(x => x.ID == option));
-                        referenceBook[referenceBook.FindIndex(x => x.ID == option)] = ReadReferenceBookFromConsoleOrLeaveAsItIs(referenceBook, option);
+                        referenceBook[referenceBook.FindIndex(x => x.ID == option)] = ReadReferenceBookFromConsoleOrLeaveAsItIs(referenceBook, option, text, pattern);
                         break;
                     case 3:
                         do
@@ -651,33 +635,38 @@ internal class Program
             }
         }
     }
-    static ReferenceBook ReadReferenceBookFromConsole(List<ReferenceBook> referenceBook)
+    static ReferenceBook ReadReferenceBookFromConsole(List<ReferenceBook> referenceBook, 
+                                                      string name, 
+                                                      string pattern = @"\w")
     {
-
+        Regex regex = new Regex(pattern);
         ReferenceBook newReferenceBook = new ReferenceBook();
         string text;
         Console.Clear();
         do
         {
-            Console.WriteLine("Введите новое название");
-        } while (!IsntNullWithConsoleOutput(out text!) || referenceBook.Exists(x => x.title.Equals(text)));
+            Console.WriteLine($"Введите новое название \"{name}\"");
+        } while (!IsValidByRegex(out text!, regex) || referenceBook.Exists(x => x.title.Equals(text)));
         newReferenceBook.title = text;
         newReferenceBook.ID = GetNewId(referenceBook);
         return newReferenceBook;
     }
-    static ReferenceBook ReadReferenceBookFromConsoleOrLeaveAsItIs(List<ReferenceBook> referenceBook, int option)
+    static ReferenceBook ReadReferenceBookFromConsoleOrLeaveAsItIs(List<ReferenceBook> referenceBook,
+                                                                   int option,
+                                                                   string name,
+                                                                   string pattern = @"\w")
     {
+        Regex regex = new Regex(pattern);
         ReferenceBook newReferenceBook = new ReferenceBook();
         string? text;
         Console.Clear();
         do
         {
-            Console.WriteLine("Введите новое название или нажмите Enter чтобы оставить как есть");
+            Console.WriteLine($"Введите новое название \"{name}\" или нажмите Enter чтобы оставить как есть");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine($"На данный момент: {referenceBook[option].title}");
             Console.ResetColor();
-            text = Console.ReadLine();
-        } while (referenceBook.Exists(x => x.title.Equals(text)));
+        } while (!IsValidByRegex(out text!, regex) || referenceBook.Exists(x => x.title.Equals(text)));
         newReferenceBook.title = text == null || text.Length == 0 ? referenceBook[option].title : text;
         newReferenceBook.ID = referenceBook[option].ID;
         return newReferenceBook;
@@ -732,12 +721,11 @@ internal class Program
     }
 
 
-    static void WritePublication(List<Publication> publications, //лучше перегрузка или два отдельных метода?
+    static void WritePublication(List<Publication> publications,
                                  List<ReferenceBook> referenceBookOfType,
                                  List<ReferenceBook> referenceBookOfUDC,
                                  List<ReferenceBook> referenceBookOfFullNameOfReviewer)
     {
-        Console.WriteLine(publications.Count);
         for (int i = 0; i < publications.Count; i++)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -918,19 +906,19 @@ internal class Program
     {
         return publications.FindAll(x => x.dateOfRegistration >= startDate && x.dateOfRegistration <= endDate);
     }
-    private static List<Publication> FindAllPublicationByType(List<Publication> publications, int typeOfPublication)
+    static List<Publication> FindAllPublicationByType(List<Publication> publications, int typeOfPublication)
     {
         return publications.FindAll(x => x.IDOfType == typeOfPublication);
     }
-    private static List<Publication> FindAllPublicationByUDC(List<Publication> publications, int UDC)
+    static List<Publication> FindAllPublicationByUDC(List<Publication> publications, int UDC)
     {
         return publications.FindAll(x => x.IDOfUDC == UDC);
     }
-    private static List<Publication> FindAllPublicationByTitle(List<Publication> publications, string text)
+    static List<Publication> FindAllPublicationByTitle(List<Publication> publications, string text)
     {
         return publications.FindAll(x => x.title.ToLower().Contains(text.ToLower()));
     }
-    private static List<Publication> FindAllPublicationByJournalNumber(List<Publication> publications, int journalNumber)
+    static List<Publication> FindAllPublicationByJournalNumber(List<Publication> publications, int journalNumber)
     {
         return publications.FindAll(x => x.journalNumber == journalNumber);
     }
@@ -1027,7 +1015,7 @@ internal class Program
     {
         publications.Sort((x, y) => x.journalNumber.CompareTo(y.journalNumber));
     }
-    private static void SortPublicationByFullNameOfReviewer(List<Publication> publications, List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+    static void SortPublicationByFullNameOfReviewer(List<Publication> publications, List<ReferenceBook> referenceBookOfFullNameOfReviewer)
     {
         publications.Sort((x, y) => referenceBookOfFullNameOfReviewer.Find(z => z.ID == x.IDOfFullNameOfReviewer).title.CompareTo(referenceBookOfFullNameOfReviewer.Find(z => z.ID == y.IDOfFullNameOfReviewer).title));
     }
@@ -1035,14 +1023,14 @@ internal class Program
 
     #region Save and Recover
     static void SaveAllChanges(StreamWriter swOfPublications, List<Publication> publications,
-                           StreamWriter swOfRBOfType, List<ReferenceBook> RBOfType,
-                           StreamWriter swOfRBOfUDC, List<ReferenceBook> RBOfUDC,
-                           StreamWriter swOfRBOfReviewer, List<ReferenceBook> RBOfReviewer)
+                               StreamWriter swOfReferenceBookOfType, List<ReferenceBook> ReferenceBookOfType,
+                               StreamWriter swOfReferenceBookOfUDC, List<ReferenceBook> ReferenceBookOfUDC,
+                               StreamWriter swOfReferenceBookOfReviewer, List<ReferenceBook> ReferenceBookOfReviewer)
     {
         SavePublications(swOfPublications, publications);
-        SaveReferenceBook(swOfRBOfType, RBOfType);
-        SaveReferenceBook(swOfRBOfUDC, RBOfUDC);
-        SaveReferenceBook(swOfRBOfReviewer, RBOfReviewer);
+        SaveReferenceBook(swOfReferenceBookOfType, ReferenceBookOfType);
+        SaveReferenceBook(swOfReferenceBookOfUDC, ReferenceBookOfUDC);
+        SaveReferenceBook(swOfReferenceBookOfReviewer, ReferenceBookOfReviewer);
     }
 
     static void SavePublications(StreamWriter swOfPublications, List<Publication> publications)
@@ -1069,20 +1057,20 @@ internal class Program
         swOfPublications.Close();
     }
 
-    static void SaveReferenceBook(StreamWriter swOfRB, List<ReferenceBook> ReferenceBook)
+    static void SaveReferenceBook(StreamWriter swOfReferenceBook, List<ReferenceBook> ReferenceBook)
     {
         for (int i = 0; i < ReferenceBook.Count; i++)
         {
             if (i < ReferenceBook.Count - 1)
             {
-                swOfRB.WriteLine(ReferenceBook[i].title);
+                swOfReferenceBook.WriteLine(ReferenceBook[i].title);
             }
             else
             {
-                swOfRB.Write(ReferenceBook[i].title);
+                swOfReferenceBook.Write(ReferenceBook[i].title);
             }
         }
-        swOfRB.Close();
+        swOfReferenceBook.Close();
     }
 
     static void RecoverDataFromFile(List<Publication> publications,
