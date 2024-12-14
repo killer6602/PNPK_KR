@@ -102,8 +102,9 @@ internal class Program
             Console.WriteLine("3) Вывод данных");
             Console.WriteLine("4) Поиск в БД");
             Console.WriteLine("5) Сортировка записей");
+            Console.WriteLine("6) Создать отчёт");
             Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("6) Востановить данные из резервного файла");
+            Console.WriteLine("7) Востановить данные из резервного файла");
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("0) Сохранить и выйти");
             Console.ResetColor();
@@ -128,6 +129,9 @@ internal class Program
                         SortMenu(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
                         break;
                     case 6:
+                        ReportMenu(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
+                        break;
+                    case 7:
                         RecoverDataFromFile(publications, referenceBookOfType, referenceBookOfUDC, referenceBookOfFullNameOfReviewer);
                         break;
                     case 0:
@@ -142,6 +146,174 @@ internal class Program
             }
         }
     }
+
+    #region Report
+    static void ReportMenu(List<Publication> publications,
+                         List<ReferenceBook> referenceBookOfType,
+                         List<ReferenceBook> referenceBookOfUDC,
+                         List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+    {
+        bool flag = true;
+        while (flag)
+        {
+            Console.WriteLine("Выберете один из вариантов создания отчёта:");
+            Console.WriteLine("1) По номеру журнала");
+            Console.WriteLine("2) По автору");
+            Console.WriteLine("3) По рецензенту");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("0) Назад");
+            Console.ResetColor();
+            if (IsValidOption(out int option))
+            {
+                Console.Clear();
+                switch (option)
+                {
+                    case 1:
+                        CreateReportByJournalNumber(publications, referenceBookOfType, referenceBookOfUDC, "..\\..\\..\\Reports\\JournalNumber.txt");
+                        break;
+                    case 2:
+                        CreateReportByAuthor(publications, referenceBookOfType, referenceBookOfUDC, "..\\..\\..\\Reports\\Author.txt");
+                        break;
+                    case 3:
+                        CreateReportByReviewer(publications, referenceBookOfFullNameOfReviewer, "..\\..\\..\\Reports\\Reviewer.txt");
+                        break;
+                    case 0:
+                        flag = false;
+                        break;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Отсутствует опция под номером {option}");
+                        Console.ResetColor();
+                        break;
+                }
+            }
+        }
+    }
+
+    private static void CreateReportByJournalNumber(List<Publication> publications, List<ReferenceBook> referenceBookOfType, List<ReferenceBook> referenceBookOfUDC, string path)
+    {
+        StreamWriter sw = new StreamWriter(path, false, Encoding.UTF8);
+        List<Publication> publicationsCopy = publications;
+        SortPublicationByJournalNumber(publicationsCopy);
+        List<int> journalNumberVariaty = new List<int>();
+        for (int i = 0; i < publicationsCopy.Count; i++)
+        {
+            if (!journalNumberVariaty.Exists(x => x == publicationsCopy[i].journalNumber))
+            {
+                journalNumberVariaty.Add(publicationsCopy[i].journalNumber);
+            }
+        }
+        for (int i = 0; i < journalNumberVariaty.Count; i++)
+        {
+            List<Publication> result = publicationsCopy.FindAll(x => x.journalNumber == journalNumberVariaty[i]);
+            SortPublicationByUDC(result);
+            SortPublicationByType(result);
+            SortPublicationByFullNameOfAuthor(result);
+            sw.WriteLine(new string('▬', 120));
+            sw.WriteLine();
+            sw.WriteLine(journalNumberVariaty[i]);
+            sw.WriteLine(new string('-', 107));
+            sw.WriteLine("|  № |                  ФИО автора                  | УДК | Тип публикации |           Название           |");
+            sw.WriteLine(new string('-', 107));
+            for (int j = 0; j < result.Count; j++)
+            {
+                sw.WriteLine($"|{j + 1:D4}|" +
+                    $"{new String(' ', (47 - result[j].fullNameOfAuthor.Length) / 2) + result[j].fullNameOfAuthor + new String(' ', (46 - result[j].fullNameOfAuthor.Length) / 2)}|" +
+                    $" {referenceBookOfUDC.Find(x => x.ID == result[j].IDOfUDC).title} |" +
+                    $"{new String(' ', (17 - referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title.Length) / 2) + referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title + new String(' ', (16 - referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title.Length) / 2)}|" +
+                    $"{(result[j].title.Trim(' ').Length > 30 ? (result[j].title.Substring(0, 27).Trim() + new string('.', 30 - result[j].title.Substring(0, 27).Trim().Length)) : new String(' ', (30 - result[j].title.Length) / 2) + result[j].title + new String(' ', (31 - result[j].title.Length) / 2))}|");
+                sw.WriteLine(new string('-', 107));
+            }
+            sw.WriteLine();
+            sw.WriteLine(new string('▬', 120));
+            sw.WriteLine();
+            sw.WriteLine();
+        }
+        sw.Close();
+    }
+
+    private static void CreateReportByAuthor(List<Publication> publications, List<ReferenceBook> referenceBookOfType, List<ReferenceBook> referenceBookOfUDC, string path)
+    {
+        StreamWriter sw = new StreamWriter(path, false, Encoding.UTF8);
+        List<Publication> publicationsCopy = publications;
+        SortPublicationByFullNameOfAuthor(publications);
+        List<string> fullNameOfAuthorVariaty = new List<string>();
+        for (int i = 0; i < publicationsCopy.Count; i++)
+        {
+            if (!fullNameOfAuthorVariaty.Exists(x => x == publicationsCopy[i].fullNameOfAuthor))
+            {
+                fullNameOfAuthorVariaty.Add(publicationsCopy[i].fullNameOfAuthor);
+            }
+        }
+        for (int i = 0; i < fullNameOfAuthorVariaty.Count; i++)
+        {
+            List<Publication> result = publicationsCopy.FindAll(x => x.fullNameOfAuthor == fullNameOfAuthorVariaty[i]);
+            SortPublicationByJournalNumber(result);
+            sw.WriteLine(new string('▬', 120));
+            sw.WriteLine();
+            sw.WriteLine(fullNameOfAuthorVariaty[i]);
+            sw.WriteLine(new string('-', 76));
+            sw.WriteLine("|  № | УДК | Тип публикации |           Название           | Номер журнала |");
+            sw.WriteLine(new string('-', 76));
+            for (int j = 0; j < result.Count; j++)
+            {
+                sw.WriteLine($"|{j + 1:D4}|" +
+                    $" {referenceBookOfUDC.Find(x => x.ID == result[j].IDOfUDC).title} |" +
+                    $"{new String(' ', (17 - referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title.Length) / 2) + referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title + new String(' ', (16 - referenceBookOfType.Find(x => x.ID == result[j].IDOfType).title.Length) / 2)}|" +
+                    $"{(result[j].title.Trim(' ').Length > 30 ? (result[j].title.Substring(0, 27).Trim() + new string('.', 30 - result[j].title.Substring(0, 27).Trim().Length)) : new String(' ', (30 - result[j].title.Length) / 2) + result[j].title + new String(' ', (31 - result[j].title.Length) / 2))}|" +
+                    $"{new String(' ', (16 - result[j].journalNumber.ToString().Length) / 2) + result[j].journalNumber + new String(' ', (15 - result[j].journalNumber.ToString().Length) / 2)}|");
+                sw.WriteLine(new string('-', 76));
+            }
+            sw.WriteLine();
+            sw.WriteLine(new string('▬', 120));
+            sw.WriteLine();
+            sw.WriteLine();
+        }
+        sw.Close();
+    }
+
+    private static void CreateReportByReviewer(List<Publication> publications, List<ReferenceBook> referenceBookOfFullNameOfReviewer, string path)
+    {
+        StreamWriter sw = new StreamWriter(path, false, Encoding.UTF8);
+        List<Publication> publicationsCopy = publications;
+        SortPublicationByFullNameOfReviewer(publicationsCopy, referenceBookOfFullNameOfReviewer);
+        List<string> fullNameOfReviewerVariaty = new List<string>();
+        for (int i = 0; i < publicationsCopy.Count; i++)
+        {
+            if (!fullNameOfReviewerVariaty.Exists(x => x == referenceBookOfFullNameOfReviewer.Find(x => x.ID == publicationsCopy[i].IDOfFullNameOfReviewer).title))
+            {
+                fullNameOfReviewerVariaty.Add(referenceBookOfFullNameOfReviewer.Find(x => x.ID == publicationsCopy[i].IDOfFullNameOfReviewer).title);
+            }
+        }
+        for (int i = 0; i < fullNameOfReviewerVariaty.Count; i++)
+        {
+            List<Publication> result = publicationsCopy.FindAll(x => referenceBookOfFullNameOfReviewer.Find(y => y.ID == x.IDOfFullNameOfReviewer).title == fullNameOfReviewerVariaty[i]);
+            SortPublicationByJournalNumber(result);
+            sw.WriteLine(new string('▬', 120));
+            sw.WriteLine();
+            sw.WriteLine(fullNameOfReviewerVariaty[i]);
+            sw.WriteLine(new string('-', 35));
+            sw.WriteLine("|  № | Номер журнала | Количество |");
+            sw.WriteLine(new string('-', 35));
+            for (int j = 0; j < result.Count; j++)
+            {
+                if(j>0 && result[j].journalNumber == result[j - 1].journalNumber)
+                {
+                    continue;
+                }
+                sw.WriteLine($"|{j + 1:D4}|" +
+                    $"{new String(' ', (16 - result[j].journalNumber.ToString().Length) / 2) + result[j].journalNumber + new String(' ', (15 - result[j].journalNumber.ToString().Length) / 2)}|" +
+                    $"{new String(' ', (13 - result.FindAll(x => x.journalNumber == result[j].journalNumber).Count.ToString().Length) / 2) + result.FindAll(x => x.journalNumber == result[j].journalNumber).Count + new String(' ', (12 - result.FindAll(x => x.journalNumber == result[j].journalNumber).Count.ToString().Length) / 2)}|");
+                sw.WriteLine(new string('-', 35));
+            }
+            sw.WriteLine();
+            sw.WriteLine(new string('▬', 120));
+            sw.WriteLine();
+            sw.WriteLine();
+        }
+        sw.Close();
+    }
+    #endregion
 
     #region Read
     static List<Publication> ReadPublicationsFromFile(StreamReader srPublication)
@@ -831,34 +1003,33 @@ internal class Program
         }
     }
 
-    private static void SortPublicationByRegestrationDate(List<Publication> publications)
+    static void SortPublicationByRegestrationDate(List<Publication> publications)
     {
         publications.Sort((x, y) => x.numberOfRegistration.CompareTo(y.numberOfRegistration));
     }
-
-    private static void SortPublicationByType(List<Publication> publications)
+    static void SortPublicationByType(List<Publication> publications)
     {
         publications.Sort((x, y) => x.IDOfType.CompareTo(y.IDOfType));
     }
-
-    private static void SortPublicationByUDC(List<Publication> publications)
+    static void SortPublicationByUDC(List<Publication> publications)
     {
         publications.Sort((x, y) => x.IDOfUDC.CompareTo(y.IDOfUDC));
     }
-
-    private static void SortPublicationByFullNameOfAuthor(List<Publication> publications)
+    static void SortPublicationByFullNameOfAuthor(List<Publication> publications)
     {
         publications.Sort((x, y) => x.fullNameOfAuthor.CompareTo(y.fullNameOfAuthor));
     }
-
-    private static void SortPublicationByTitle(List<Publication> publications)
+    static void SortPublicationByTitle(List<Publication> publications)
     {
         publications.Sort((x, y) => x.title.CompareTo(y.title));
     }
-
-    private static void SortPublicationByJournalNumber(List<Publication> publications)
+    static void SortPublicationByJournalNumber(List<Publication> publications)
     {
         publications.Sort((x, y) => x.journalNumber.CompareTo(y.journalNumber));
+    }
+    private static void SortPublicationByFullNameOfReviewer(List<Publication> publications, List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+    {
+        publications.Sort((x, y) => referenceBookOfFullNameOfReviewer.Find(z => z.ID == x.IDOfFullNameOfReviewer).title.CompareTo(referenceBookOfFullNameOfReviewer.Find(z => z.ID == y.IDOfFullNameOfReviewer).title));
     }
     #endregion
 
