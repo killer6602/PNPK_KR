@@ -1,9 +1,9 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
-internal class Program
+public class Program
 {
 
-    struct Publication
+    public struct Publication
     {
         public long numberOfRegistration;
         public DateOnly dateOfRegistration;
@@ -16,22 +16,21 @@ internal class Program
         public DateOnly magazineReleaseDate;
     }
 
-    struct ReferenceBook
+    public struct ReferenceBook
     {
         public long ID;
         public string title;
     }
 
-    static void Main()
+    public static void Main()
     {
         Console.OutputEncoding = Encoding.UTF8;
         Console.ResetColor();
         Console.Clear();
 
-        StreamReader streamReader = new("..\\..\\..\\DataFiles\\ReferenceBookOfFullNameOfReviewer.txt");
         StreamReader srReferenceBookOfType = new("..\\..\\..\\DataFiles\\ReferenceBookOfType.txt"),
             srReferenceBookOfUDC = new("..\\..\\..\\DataFiles\\ReferenceBookOfUDC.txt"),
-            srReferenceBookOfFullNameOfReviewer = streamReader,
+            srReferenceBookOfFullNameOfReviewer = new("..\\..\\..\\DataFiles\\ReferenceBookOfFullNameOfReviewer.txt"),
             srPublication = new("..\\..\\..\\DataFiles\\Publications.txt");
         List<Publication> publications = ReadPublicationsFromFile(srPublication);
         List<ReferenceBook> referenceBookOfType = ReadReferenceBookFromFile(srReferenceBookOfType),
@@ -64,7 +63,7 @@ internal class Program
                        swReferenceBookOfFullNameOfReviewer, referenceBookOfFullNameOfReviewer);
     }
 
-    static void MainMenu(List<Publication> publications,
+    public static void MainMenu(List<Publication> publications,
                          List<ReferenceBook> referenceBookOfType,
                          List<ReferenceBook> referenceBookOfUDC,
                          List<ReferenceBook> referenceBookOfFullNameOfReviewer)
@@ -123,7 +122,7 @@ internal class Program
     }
 
     #region Report
-    static void ReportMenu(List<Publication> publications,
+    public static void ReportMenu(List<Publication> publications,
                          List<ReferenceBook> referenceBookOfType,
                          List<ReferenceBook> referenceBookOfUDC,
                          List<ReferenceBook> referenceBookOfFullNameOfReviewer)
@@ -165,10 +164,10 @@ internal class Program
         }
     }
 
-    static void CreateReportByJournalNumber(List<Publication> publications, 
-                                            List<ReferenceBook> referenceBookOfType,
-                                            List<ReferenceBook> referenceBookOfUDC, 
-                                            string path)
+    public static void CreateReportByJournalNumber(List<Publication> publications, 
+                                                   List<ReferenceBook> referenceBookOfType,
+                                                   List<ReferenceBook> referenceBookOfUDC, 
+                                                   string path)
     {
         StreamWriter sw = new(path, false, Encoding.UTF8);
         List<Publication> publicationsCopy = publications;
@@ -210,10 +209,10 @@ internal class Program
         sw.Close();
     }
 
-    static void CreateReportByAuthor(List<Publication> publications, 
-                                     List<ReferenceBook> referenceBookOfType, 
-                                     List<ReferenceBook> referenceBookOfUDC, 
-                                     string path)
+    public static void CreateReportByAuthor(List<Publication> publications, 
+                                            List<ReferenceBook> referenceBookOfType, 
+                                            List<ReferenceBook> referenceBookOfUDC, 
+                                            string path)
     {
         StreamWriter sw = new(path, false, Encoding.UTF8);
         List<Publication> publicationsCopy = publications;
@@ -253,9 +252,9 @@ internal class Program
         sw.Close();
     }
 
-    static void CreateReportByReviewer(List<Publication> publications, 
-                                       List<ReferenceBook> referenceBookOfFullNameOfReviewer,
-                                       string path)
+    public static void CreateReportByReviewer(List<Publication> publications, 
+                                              List<ReferenceBook> referenceBookOfFullNameOfReviewer,
+                                              string path)
     {
         StreamWriter sw = new(path, false, Encoding.UTF8);
         List<Publication> publicationsCopy = publications;
@@ -299,7 +298,7 @@ internal class Program
     #endregion
 
     #region Read
-    static List<Publication> ReadPublicationsFromFile(StreamReader srPublication)
+    public static List<Publication> ReadPublicationsFromFile(StreamReader srPublication)
     {
         Type type = new Publication().GetType();
         int n = srPublication.ReadToEnd().Split('\n').Length / type.GetFields().Length;//получение количества объектов в файле
@@ -312,7 +311,7 @@ internal class Program
         }
         return publications;
     }
-    static Publication ReadPublicationFromFile(StreamReader srPublication)//нету проверок т.к. файл доверенный источник и в нём нет ошибок
+    public static Publication ReadPublicationFromFile(StreamReader srPublication)//нету проверок т.к. файл доверенный источник и в нём нет ошибок
     {
         Publication publication = new()
         {
@@ -328,7 +327,7 @@ internal class Program
         };
         return publication;
     }
-    static List<ReferenceBook> ReadReferenceBookFromFile(StreamReader srReferenceBook)
+    public static List<ReferenceBook> ReadReferenceBookFromFile(StreamReader srReferenceBook)
     {
         int n = srReferenceBook.ReadToEnd().Split('\n').Length;//получение количества объектов в файле
         srReferenceBook.BaseStream.Position = 0;//возвращение указателя StreamReader в начало файла
@@ -346,7 +345,7 @@ internal class Program
     #endregion
 
     #region Edit
-    static void EditDBMenu(List<Publication> publications,
+    public static void EditDBMenu(List<Publication> publications,
                            List<ReferenceBook> referenceBookOfType,
                            List<ReferenceBook> referenceBookOfUDC,
                            List<ReferenceBook> referenceBookOfFullNameOfReviewer)
@@ -403,7 +402,7 @@ internal class Program
             }
         }
     }
-    static Publication ReadPublicationFromConsole(List<ReferenceBook> referenceBookOfType,
+    public static Publication ReadPublicationFromConsole(List<ReferenceBook> referenceBookOfType,
                                                   List<ReferenceBook> referenceBookOfUDC,
                                                   List<ReferenceBook> referenceBookOfFullNameOfReviewer)
     {
@@ -463,7 +462,7 @@ internal class Program
         newPublication.magazineReleaseDate = date;
         return newPublication;
     }
-    static Publication ReadPublicationFromConsoleOrLeaveAsItIs(Publication publication,
+    public static Publication ReadPublicationFromConsoleOrLeaveAsItIs(Publication publication,
                                                                List<ReferenceBook> referenceBookOfType,
                                                                List<ReferenceBook> referenceBookOfUDC,
                                                                List<ReferenceBook> referenceBookOfFullNameOfReviewer)
@@ -543,7 +542,7 @@ internal class Program
         return newPublication;
     }
 
-    static void EditReferenceBooksMenu(List<ReferenceBook> referenceBookOfType,
+    public static void EditReferenceBooksMenu(List<ReferenceBook> referenceBookOfType,
                                        List<ReferenceBook> referenceBookOfUDC,
                                        List<ReferenceBook> referenceBookOfFullNameOfReviewer)
     {
@@ -585,7 +584,7 @@ internal class Program
             }
         }
     }
-    static void EditChosenReferenceBooksMenu(List<ReferenceBook> referenceBook, 
+    public static void EditChosenReferenceBooksMenu(List<ReferenceBook> referenceBook, 
                                              string text, 
                                              string pattern = @"\w")
     {
@@ -639,7 +638,7 @@ internal class Program
             }
         }
     }
-    static ReferenceBook ReadReferenceBookFromConsole(List<ReferenceBook> referenceBook, 
+    public static ReferenceBook ReadReferenceBookFromConsole(List<ReferenceBook> referenceBook, 
                                                       string name, 
                                                       string pattern = @"\w")
     {
@@ -655,7 +654,7 @@ internal class Program
         newReferenceBook.ID = GetNewId(referenceBook);
         return newReferenceBook;
     }
-    static ReferenceBook ReadReferenceBookFromConsoleOrLeaveAsItIs(List<ReferenceBook> referenceBook,
+    public static ReferenceBook ReadReferenceBookFromConsoleOrLeaveAsItIs(List<ReferenceBook> referenceBook,
                                                                    int option,
                                                                    string name,
                                                                    string pattern = @"\w")
@@ -678,7 +677,7 @@ internal class Program
     #endregion
 
     #region Output
-    static void OutputMenu(List<Publication> publications,
+    public static void OutputMenu(List<Publication> publications,
                            List<ReferenceBook> referenceBookOfType,
                            List<ReferenceBook> referenceBookOfUDC,
                            List<ReferenceBook> referenceBookOfFullNameOfReviewer)
@@ -725,7 +724,7 @@ internal class Program
     }
 
 
-    static void WritePublication(List<Publication> publications,
+    public static void WritePublication(List<Publication> publications,
                                  List<ReferenceBook> referenceBookOfType,
                                  List<ReferenceBook> referenceBookOfUDC,
                                  List<ReferenceBook> referenceBookOfFullNameOfReviewer)
@@ -746,7 +745,7 @@ internal class Program
         Console.ResetColor();
         Console.WriteLine();
     }
-    static void WritePublication(Publication publication,
+    public static void WritePublication(Publication publication,
                                  List<ReferenceBook> referenceBookOfType,
                                  List<ReferenceBook> referenceBookOfUDC,
                                  List<ReferenceBook> referenceBookOfFullNameOfReviewer)
@@ -764,7 +763,7 @@ internal class Program
         Console.WriteLine();
     }
 
-    static void WriteReferenceBook(List<ReferenceBook> referenceBook, string text)
+    public static void WriteReferenceBook(List<ReferenceBook> referenceBook, string text)
     {
         Console.WriteLine($"| ID |\t{text}");
         Console.WriteLine($"{new string('-', Console.BufferWidth)}");
@@ -774,14 +773,14 @@ internal class Program
         }
         Console.WriteLine();
     }
-    static void WriteReferenceBook(ReferenceBook referenceBook)
+    public static void WriteReferenceBook(ReferenceBook referenceBook)
     {
         Console.WriteLine($"|{referenceBook.ID:D4}|\t{referenceBook.title}");
     }
     #endregion
 
     #region Search
-    static void SearchMenu(List<Publication> publications,
+    public static void SearchMenu(List<Publication> publications,
                            List<ReferenceBook> referenceBookOfType,
                            List<ReferenceBook> referenceBookOfUDC,
                            List<ReferenceBook> referenceBookOfFullNameOfReviewer)
@@ -906,30 +905,30 @@ internal class Program
             }
         }
     }
-    static List<Publication> FindAllPublicationByRegestrationDate(List<Publication> publications, DateOnly startDate, DateOnly endDate)
+    public static List<Publication> FindAllPublicationByRegestrationDate(List<Publication> publications, DateOnly startDate, DateOnly endDate)
     {
         return publications.FindAll(x => x.dateOfRegistration >= startDate && x.dateOfRegistration <= endDate);
     }
-    static List<Publication> FindAllPublicationByType(List<Publication> publications, int typeOfPublication)
+    public static List<Publication> FindAllPublicationByType(List<Publication> publications, int typeOfPublication)
     {
         return publications.FindAll(x => x.IDOfType == typeOfPublication);
     }
-    static List<Publication> FindAllPublicationByUDC(List<Publication> publications, int UDC)
+    public static List<Publication> FindAllPublicationByUDC(List<Publication> publications, int UDC)
     {
         return publications.FindAll(x => x.IDOfUDC == UDC);
     }
-    static List<Publication> FindAllPublicationByTitle(List<Publication> publications, string text)
+    public static List<Publication> FindAllPublicationByTitle(List<Publication> publications, string text)
     {
         return publications.FindAll(x => x.title.ToLower().Contains(text.ToLower()));
     }
-    static List<Publication> FindAllPublicationByJournalNumber(List<Publication> publications, int journalNumber)
+    public static List<Publication> FindAllPublicationByJournalNumber(List<Publication> publications, int journalNumber)
     {
         return publications.FindAll(x => x.journalNumber == journalNumber);
     }
     #endregion
 
     #region Sort
-    static void SortMenu(List<Publication> publications,
+    public static void SortMenu(List<Publication> publications,
                          List<ReferenceBook> referenceBookOfType,
                          List<ReferenceBook> referenceBookOfUDC,
                          List<ReferenceBook> referenceBookOfFullNameOfReviewer)
@@ -995,38 +994,38 @@ internal class Program
         }
     }
 
-    static void SortPublicationByRegestrationDate(List<Publication> publications)
+    public static void SortPublicationByRegestrationDate(List<Publication> publications)
     {
         publications.Sort((x, y) => x.numberOfRegistration.CompareTo(y.numberOfRegistration));
     }
-    static void SortPublicationByType(List<Publication> publications)
+    public static void SortPublicationByType(List<Publication> publications)
     {
         publications.Sort((x, y) => x.IDOfType.CompareTo(y.IDOfType));
     }
-    static void SortPublicationByUDC(List<Publication> publications)
+    public static void SortPublicationByUDC(List<Publication> publications)
     {
         publications.Sort((x, y) => x.IDOfUDC.CompareTo(y.IDOfUDC));
     }
-    static void SortPublicationByFullNameOfAuthor(List<Publication> publications)
+    public static void SortPublicationByFullNameOfAuthor(List<Publication> publications)
     {
         publications.Sort((x, y) => x.fullNameOfAuthor.CompareTo(y.fullNameOfAuthor));
     }
-    static void SortPublicationByTitle(List<Publication> publications)
+    public static void SortPublicationByTitle(List<Publication> publications)
     {
         publications.Sort((x, y) => x.title.CompareTo(y.title));
     }
-    static void SortPublicationByJournalNumber(List<Publication> publications)
+    public static void SortPublicationByJournalNumber(List<Publication> publications)
     {
         publications.Sort((x, y) => x.journalNumber.CompareTo(y.journalNumber));
     }
-    static void SortPublicationByFullNameOfReviewer(List<Publication> publications, List<ReferenceBook> referenceBookOfFullNameOfReviewer)
+    public static void SortPublicationByFullNameOfReviewer(List<Publication> publications, List<ReferenceBook> referenceBookOfFullNameOfReviewer)
     {
         publications.Sort((x, y) => referenceBookOfFullNameOfReviewer.Find(z => z.ID == x.IDOfFullNameOfReviewer).title.CompareTo(referenceBookOfFullNameOfReviewer.Find(z => z.ID == y.IDOfFullNameOfReviewer).title));
     }
     #endregion
 
     #region Save and Recover
-    static void SaveAllChanges(StreamWriter swOfPublications, List<Publication> publications,
+    public static void SaveAllChanges(StreamWriter swOfPublications, List<Publication> publications,
                                StreamWriter swOfReferenceBookOfType, List<ReferenceBook> ReferenceBookOfType,
                                StreamWriter swOfReferenceBookOfUDC, List<ReferenceBook> ReferenceBookOfUDC,
                                StreamWriter swOfReferenceBookOfReviewer, List<ReferenceBook> ReferenceBookOfReviewer)
@@ -1037,7 +1036,7 @@ internal class Program
         SaveReferenceBook(swOfReferenceBookOfReviewer, ReferenceBookOfReviewer);
     }
 
-    static void SavePublications(StreamWriter swOfPublications, List<Publication> publications)
+    public static void SavePublications(StreamWriter swOfPublications, List<Publication> publications)
     {
         for (int i = 0; i < publications.Count; i++)
         {
@@ -1061,7 +1060,7 @@ internal class Program
         swOfPublications.Close();
     }
 
-    static void SaveReferenceBook(StreamWriter swOfReferenceBook, List<ReferenceBook> ReferenceBook)
+    public static void SaveReferenceBook(StreamWriter swOfReferenceBook, List<ReferenceBook> ReferenceBook)
     {
         for (int i = 0; i < ReferenceBook.Count; i++)
         {
@@ -1077,7 +1076,7 @@ internal class Program
         swOfReferenceBook.Close();
     }
 
-    static void RecoverDataFromFile(ref List<Publication> publications,
+    public static void RecoverDataFromFile(ref List<Publication> publications,
                                     ref List<ReferenceBook> referenceBookOfType,
                                     ref List<ReferenceBook> referenceBookOfUDC,
                                     ref List<ReferenceBook> referenceBookOfFullNameOfReviewer)
@@ -1091,7 +1090,7 @@ internal class Program
         referenceBookOfUDC = ReadReferenceBookFromFile(srReservReferenceBookOfUDC);
         referenceBookOfFullNameOfReviewer = ReadReferenceBookFromFile(srReservReferenceBookOfFullNameOfReviewer);
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("Данные успешно востановленно");
+        Console.WriteLine("Данные успешно востановленны");
         Console.ResetColor();
     }
     #endregion
@@ -1099,7 +1098,7 @@ internal class Program
     #region IsVAlid
 
     #region int
-    static bool IsValid(out int option, int? start = null, int? end = null)
+    public static bool IsValid(out int option, int? start = null, int? end = null)
     {
         if (int.TryParse(Console.ReadLine(), out option) && (start == null || option >= start) && (end == null || option <= end))
         {
@@ -1114,7 +1113,7 @@ internal class Program
             return false;
         }
     }
-    static bool IsValidOrNull(out int option, int? start = null, int? end = null)
+    public static bool IsValidOrNull(out int option, int? start = null, int? end = null)
     {
         string? input = Console.ReadLine();
         option = -1;
@@ -1134,7 +1133,7 @@ internal class Program
     #endregion
 
     #region long
-    static bool IsValid(out long option, int? start = null, int? end = null)
+    public static bool IsValid(out long option, int? start = null, int? end = null)
     {
         if (long.TryParse(Console.ReadLine(), out option) && (start == null || option >= start) && (end == null || option <= end))
         {
@@ -1149,7 +1148,7 @@ internal class Program
             return false;
         }
     }
-    static bool IsValidOrNull(out long option, int? start = null, int? end = null)
+    public static bool IsValidOrNull(out long option, int? start = null, int? end = null)
     {
         string? input = Console.ReadLine();
         option = -1;
@@ -1169,7 +1168,7 @@ internal class Program
     #endregion
 
     #region DateOnly
-    static bool IsValid(out DateOnly output)
+    public static bool IsValid(out DateOnly output)
     {
         if (DateOnly.TryParse(Console.ReadLine(), out output))
         {
@@ -1184,7 +1183,7 @@ internal class Program
             return false;
         }
     }
-    static bool IsValidOrNull(out DateOnly output)
+    public static bool IsValidOrNull(out DateOnly output)
     {
         string? input = Console.ReadLine();
         output = new DateOnly(1, 1, 1);
@@ -1204,7 +1203,7 @@ internal class Program
     #endregion
 
     #region Regex
-    static bool IsValidByRegex(out string? input, Regex pattern)
+    public static bool IsValidByRegex(out string? input, Regex pattern)
     {
         input = Console.ReadLine();
         if (pattern.IsMatch(input!))
@@ -1220,7 +1219,7 @@ internal class Program
             return false;
         }
     }
-    static bool IsValidByRegexOrNull(out string? input, Regex pattern)
+    public static bool IsValidByRegexOrNull(out string? input, Regex pattern)
     {
         input = Console.ReadLine();
         if (pattern.IsMatch(input!) || input!.Length == 0)
@@ -1238,12 +1237,12 @@ internal class Program
     }
     #endregion
 
-    static bool IsValidOption(out int option)
+    public static bool IsValidOption(out int option)
     {
         return IsValid(out option, 0);
     }
 
-    static bool IsntNullWithConsoleOutput(out string? input)
+    public static bool IsntNullWithConsoleOutput(out string? input)
     {
         input = Console.ReadLine();
         if (input != null && input.Length != 0)
@@ -1262,7 +1261,7 @@ internal class Program
     #endregion
 
     #region Get
-    static int GetNewId(List<ReferenceBook> list)
+    public static int GetNewId(List<ReferenceBook> list)
     {
         int number = -1;
         for (int i = 0; number == -1; i++)
@@ -1275,7 +1274,7 @@ internal class Program
         return number;
     }
 
-    static int GetChosenIDOfReferenceBook(List<ReferenceBook> referenceBook, string text)
+    public static int GetChosenIDOfReferenceBook(List<ReferenceBook> referenceBook, string text)
     {
         int chosenOne;
         do
