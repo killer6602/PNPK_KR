@@ -78,7 +78,7 @@ public class Program
             Console.WriteLine("5) Сортировка записей");
             Console.WriteLine("6) Создать отчёт");
             Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("7) Востановить данные из резервного файла");
+            Console.WriteLine("7) Восстановить данные из резервного файла");
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("0) Сохранить и выйти");
             Console.ResetColor();
@@ -842,7 +842,7 @@ public class Program
                         }
                         break;
                     case 3:
-                        int UDC = GetChosenIDOfReferenceBook(referenceBookOfUDC, "Тип публикации");
+                        int UDC = GetChosenIDOfReferenceBook(referenceBookOfUDC, "УДК");
 
                         result = FindAllPublicationByUDC(publications, UDC);
                         Console.Clear();
@@ -936,7 +936,7 @@ public class Program
         bool flag = true;
         while (flag)
         {
-            Console.WriteLine("Выберете один из вариантов поиска:");
+            Console.WriteLine("Выберете один из вариантов сортировки:");
             Console.WriteLine("1) По дате регистрации");
             Console.WriteLine("2) По типу публикации");
             Console.WriteLine("3) По УДК");
@@ -1095,7 +1095,7 @@ public class Program
     }
     #endregion
 
-    #region IsVAlid
+    #region IsValid
 
     #region int
     public static bool IsValid(out int option, int? start = null, int? end = null)
